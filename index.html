@@ -52,6 +52,15 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, '微軟正黑體', sans-serif; user-select: none; }
         
+        /* 隱藏所有捲軸線條，保留滑動功能 */
+        html, body, .modal-body, #adjust-history-list, .custom-options {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        html::-webkit-scrollbar, body::-webkit-scrollbar, .modal-body::-webkit-scrollbar, #adjust-history-list::-webkit-scrollbar, .custom-options::-webkit-scrollbar {
+            display: none;
+        }
+
         html { 
             background-color: var(--bg-top); 
             overscroll-behavior-y: none; 
@@ -267,8 +276,6 @@
         .modal.show .modal-content { transform: translateY(0); }
         
         .modal-body { max-height: calc(85dvh - 80px); overflow-y: auto; padding-right: 5px; }
-        .modal-body::-webkit-scrollbar { width: 5px; }
-        .modal-body::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
 
         .modal-decor { position: absolute; top: -65px; left: 50%; transform: translateX(-50%); width: 190px; height: auto; pointer-events: none; z-index: 1001; }
 
@@ -417,7 +424,7 @@
                 <div class="account-card-value" style="color: #f39c12; cursor: pointer;" id="acc-maybank-val" onclick="toggleMyrCurrency()">0</div>
             </div>
             
-            <!-- 儲蓄區塊 (新加入，使用 #2ecc71 翡翠綠) -->
+            <!-- 儲蓄區塊 -->
             <div class="account-card">
                 <div class="account-card-name">儲蓄 <span id="savings-currency-label" style="font-size: 11px; font-weight: normal;">(TWD)</span></div>
                 <div class="account-card-value" style="color: #2ecc71; cursor: pointer;" id="acc-savings-val" onclick="toggleMyrCurrency()">0</div>
@@ -783,6 +790,8 @@
 
     const accNames = { post: '郵局', cash: '現金', maybank: '馬銀行', savings: '儲蓄', easycard: '悠游卡' };
     const accColors = ['#7bcaf5', '#ffb6c1', '#f39c12', '#2ecc71', '#b8c0ff'];
+    const isMyrAcc = (acc) => acc === 'maybank' || acc === 'savings';
+
     let currentType = 'expense';
     let currentPage = 'home';
     let myPieChart = null;
@@ -859,7 +868,17 @@
             const acc = urlParams.get('acc') || 'cash';
 
             if (amount && note) {
-                let newTx = { id: Date.now(), timestamp: Date.now(), type: type, amount: amount, note: note, singleAcc: acc };
+                const isMYR = isMyrAcc(acc);
+                const amountTWD = isMYR ? Math.round(amount * myrToTwdRate) : amount;
+                let newTx = { 
+                    id: Date.now(), 
+                    timestamp: Date.now(), 
+                    type: type, 
+                    amount: amountTWD, 
+                    originalMyr: isMYR ? amount : null,
+                    note: note, 
+                    singleAcc: acc 
+                };
                 db.transactions.push(newTx);
                 saveDB(); 
                 
@@ -904,12 +923,10 @@
         if (!isOpen) select.classList.add('open');
     }
 
-    // 更新貨幣標籤 (現在支援 馬銀行 與 儲蓄)
+    // 更新貨幣標籤 (支援 馬銀行 與 儲蓄)
     function updateCurrencyLabel() {
-        let isMYR = false;
         let acc = currentType === 'transfer' ? document.getElementById('tx-from-acc').value : document.getElementById('tx-single-acc').value;
-        
-        if (acc === 'maybank' || acc === 'savings') isMYR = true;
+        let isMYR = isMyrAcc(acc);
         
         const labelEl = document.getElementById('tx-amount-label');
         if (labelEl) {
@@ -970,30 +987,6 @@
         });
     }
 
-    const pagesOrder = ['accounts', 'home', 'ledger', 'settings']; 
-    let touchstartX = 0; let touchendX = 0;
-    
-    document.getElementById('swipe-container').addEventListener('touchstart', e => { 
-        if(!e.target.closest('.tx-item')) {
-            touchstartX = e.changedTouches[0].screenX; 
-        }
-    });
-    
-    document.getElementById('swipe-container').addEventListener('touchend', e => {
-        if(!e.target.closest('.tx-item') && touchstartX !== 0) {
-            touchendX = e.changedTouches[0].screenX;
-            const swipeThreshold = 60; 
-            if (touchstartX - touchendX > swipeThreshold) { 
-                const currentIndex = pagesOrder.indexOf(currentPage);
-                if (currentIndex < pagesOrder.length - 1) switchPage(pagesOrder[currentIndex + 1]);
-            } else if (touchendX - touchstartX > swipeThreshold) { 
-                const currentIndex = pagesOrder.indexOf(currentPage);
-                if (currentIndex > 0) switchPage(pagesOrder[currentIndex - 1]);
-            }
-            touchstartX = 0;
-        }
-    });
-
     let itemStartX = 0; let itemStartY = 0;
     function swStart(e) {
         itemStartX = e.touches[0].clientX;
@@ -1037,11 +1030,11 @@
         
         // 判斷是否為 MYR 帳戶
         let isMYR = false;
-        if (tx.type === 'transfer' && (tx.fromAcc === 'maybank' || tx.fromAcc === 'savings')) isMYR = true;
-        if (tx.type !== 'transfer' && (tx.singleAcc === 'maybank' || tx.singleAcc === 'savings')) isMYR = true;
+        if (tx.type === 'transfer' && isMyrAcc(tx.fromAcc)) isMYR = true;
+        if (tx.type !== 'transfer' && isMyrAcc(tx.singleAcc)) isMYR = true;
 
         if (isMYR) {
-            document.getElementById('tx-amount').value = tx.originalMyr || (tx.amount / myrToTwdRate).toFixed(2);
+            document.getElementById('tx-amount').value = (tx.originalMyr !== undefined && tx.originalMyr !== null) ? tx.originalMyr : (tx.amount / myrToTwdRate).toFixed(2);
         } else {
             document.getElementById('tx-amount').value = tx.amount;
         }
@@ -1145,11 +1138,11 @@
         renderApp();
     }
 
-    function updateChart(balObj) {
+    function updateChart(balTwdObj) {
         const ctx = document.getElementById('myChart');
         const isDark = document.body.classList.contains('dark-mode');
         
-        const dataVals = [balObj.post, balObj.cash, balObj.maybank, balObj.savings, balObj.easycard];
+        const dataVals = [balTwdObj.post, balTwdObj.cash, balTwdObj.maybank, balTwdObj.savings, balTwdObj.easycard];
         const sum = dataVals.reduce((a, b) => a + b, 0);
         
         document.getElementById('total-balance-display').innerText = sum.toLocaleString();
@@ -1431,18 +1424,35 @@
         closeCustomPrompt();
     }
 
+    // 核心餘額計算：台幣帳戶以 TWD 為準，馬幣帳戶 (maybank, savings) 固定以 MYR 為準
     function calculateCurrentBalances(cutoffMs) {
         let bal = { post: 0, cash: 0, maybank: 0, savings: 0, easycard: 0 };
         let filteredTx = db.transactions.filter(tx => tx.timestamp <= cutoffMs);
+        const getMyr = (tx) => (tx.originalMyr !== undefined && tx.originalMyr !== null) ? tx.originalMyr : (tx.amount / myrToTwdRate);
+
         filteredTx.sort((a, b) => a.timestamp - b.timestamp).forEach(tx => {
-            if (tx.type === 'adjust') { bal[tx.singleAcc] = tx.amount; } 
-            else {
-                if (tx.type === 'expense') bal[tx.singleAcc] -= tx.amount;
-                if (tx.type === 'income') bal[tx.singleAcc] += tx.amount;
-                if (tx.type === 'transfer') { bal[tx.fromAcc] -= tx.amount; bal[tx.toAcc] += tx.amount; }
+            if (tx.type === 'adjust') {
+                bal[tx.singleAcc] = isMyrAcc(tx.singleAcc) ? getMyr(tx) : tx.amount;
+            } else if (tx.type === 'expense') {
+                bal[tx.singleAcc] -= isMyrAcc(tx.singleAcc) ? getMyr(tx) : tx.amount;
+            } else if (tx.type === 'income') {
+                bal[tx.singleAcc] += isMyrAcc(tx.singleAcc) ? getMyr(tx) : tx.amount;
+            } else if (tx.type === 'transfer') {
+                bal[tx.fromAcc] -= isMyrAcc(tx.fromAcc) ? getMyr(tx) : tx.amount;
+                bal[tx.toAcc] += isMyrAcc(tx.toAcc) ? getMyr(tx) : tx.amount;
             }
         });
-        return { bal, filteredTx };
+
+        // 依據最新匯率即時換算成台幣顯示
+        let balTwd = {
+            post: bal.post,
+            cash: bal.cash,
+            maybank: Math.round(bal.maybank * myrToTwdRate),
+            savings: Math.round(bal.savings * myrToTwdRate),
+            easycard: bal.easycard
+        };
+
+        return { bal, balTwd, filteredTx };
     }
 
     function generateTxHTML(tx) {
@@ -1498,30 +1508,30 @@
         const endOfDayMs = new Date(viewingDate).setHours(23, 59, 59, 999);
         const startOfDayMs = new Date(viewingDate).setHours(0, 0, 0, 0);
 
-        const { bal } = calculateCurrentBalances(endOfDayMs);
-        updateChart(bal);
+        const { bal, balTwd } = calculateCurrentBalances(endOfDayMs);
+        updateChart(balTwd);
         updateBudgetBar(); 
         
         document.getElementById('acc-post-val').innerText = bal.post.toLocaleString();
         document.getElementById('acc-cash-val').innerText = bal.cash.toLocaleString();
         
-        // 渲染馬銀行與儲蓄帳戶 (判斷顯示 MYR 還是 TWD)
+        // 渲染馬銀行與儲蓄帳戶 (MYR 固定不變，TWD 隨最新匯率換算)
         const maybankValEl = document.getElementById('acc-maybank-val');
         const maybankLabelEl = document.getElementById('maybank-currency-label');
         const savingsValEl = document.getElementById('acc-savings-val');
         const savingsLabelEl = document.getElementById('savings-currency-label');
         
         if (showMyrCurrency) {
-            maybankValEl.innerText = (bal.maybank / myrToTwdRate).toFixed(2);
+            maybankValEl.innerText = Number(bal.maybank.toFixed(2)).toLocaleString();
             if (maybankLabelEl) maybankLabelEl.innerText = '(MYR)';
             
-            savingsValEl.innerText = (bal.savings / myrToTwdRate).toFixed(2);
+            savingsValEl.innerText = Number(bal.savings.toFixed(2)).toLocaleString();
             if (savingsLabelEl) savingsLabelEl.innerText = '(MYR)';
         } else {
-            maybankValEl.innerText = Math.round(bal.maybank).toLocaleString();
+            maybankValEl.innerText = balTwd.maybank.toLocaleString();
             if (maybankLabelEl) maybankLabelEl.innerText = '(TWD)';
             
-            savingsValEl.innerText = Math.round(bal.savings).toLocaleString();
+            savingsValEl.innerText = balTwd.savings.toLocaleString();
             if (savingsLabelEl) savingsLabelEl.innerText = '(TWD)';
         }
 
@@ -1608,16 +1618,28 @@
             return; 
         }
 
-        // 判斷是否為馬來西亞帳戶 (馬銀行 或 儲蓄)
-        let isMYR = false;
-        if (currentType === 'transfer') {
-            if (fAcc === 'maybank' || fAcc === 'savings') isMYR = true;
-        } else {
-            if (acc === 'maybank' || acc === 'savings') isMYR = true;
-        }
+        // 判斷輸入幣別與是否牽涉馬幣帳戶
+        let isInputMYR = false;
+        let originalMyrVal = null;
+        let amountTWD = inputAmount;
 
-        // 轉換為 TWD 存進資料庫
-        const amountTWD = isMYR ? Math.round(inputAmount * myrToTwdRate) : inputAmount;
+        if (currentType === 'transfer') {
+            if (isMyrAcc(fAcc)) {
+                isInputMYR = true;
+                originalMyrVal = inputAmount;
+                amountTWD = Math.round(inputAmount * myrToTwdRate);
+            } else if (isMyrAcc(tAcc)) {
+                // 從台幣帳戶轉到馬幣帳戶：輸入為台幣，記錄當下換算的固定馬幣金額
+                originalMyrVal = parseFloat((inputAmount / myrToTwdRate).toFixed(2));
+                amountTWD = inputAmount;
+            }
+        } else {
+            if (isMyrAcc(acc)) {
+                isInputMYR = true;
+                originalMyrVal = inputAmount;
+                amountTWD = Math.round(inputAmount * myrToTwdRate);
+            }
+        }
         
         if (editingTxId) {
             const idx = db.transactions.findIndex(t => t.id === editingTxId);
@@ -1626,7 +1648,7 @@
                     ...db.transactions[idx], 
                     type: currentType, 
                     amount: amountTWD, 
-                    originalMyr: isMYR ? inputAmount : null,
+                    originalMyr: originalMyrVal,
                     note: note, 
                     singleAcc: acc, 
                     fromAcc: fAcc, 
@@ -1640,7 +1662,7 @@
                 timestamp: Date.now(), 
                 type: currentType, 
                 amount: amountTWD, 
-                originalMyr: isMYR ? inputAmount : null,
+                originalMyr: originalMyrVal,
                 note: note 
             };
             if (currentType === 'transfer') {
@@ -1712,7 +1734,12 @@
                 const d = new Date(g.ts);
                 const dateStr = `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                 
-                let detailLines = g.txs.map(tx => `${accNames[tx.singleAcc]}：${tx.amount.toLocaleString()}`).join('<br>');
+                let detailLines = g.txs.map(tx => {
+                    if (isMyrAcc(tx.singleAcc) && tx.originalMyr !== undefined && tx.originalMyr !== null) {
+                        return `${accNames[tx.singleAcc]}：${tx.originalMyr.toLocaleString()} MYR`;
+                    }
+                    return `${accNames[tx.singleAcc]}：${tx.amount.toLocaleString()}`;
+                }).join('<br>');
                 
                 list.innerHTML += `
                     <div class="history-record-item">
@@ -1739,9 +1766,9 @@
         const { bal } = calculateCurrentBalances(Date.now());
         document.getElementById('init-post').value = bal.post;
         document.getElementById('init-cash').value = bal.cash;
-        // 馬來西亞帳戶一律要求輸入當地 MYR 金額
-        document.getElementById('init-maybank').value = (bal.maybank / myrToTwdRate).toFixed(2);
-        document.getElementById('init-savings').value = (bal.savings / myrToTwdRate).toFixed(2);
+        // 直接帶入固定馬幣餘額，不再受匯率波動影響
+        document.getElementById('init-maybank').value = parseFloat(bal.maybank.toFixed(2));
+        document.getElementById('init-savings').value = parseFloat(bal.savings.toFixed(2));
         document.getElementById('init-easycard').value = bal.easycard;
         
         const modal = document.getElementById('balance-modal');
@@ -1762,15 +1789,14 @@
         const newSavingsMyr = parseFloat(document.getElementById('init-savings').value) || 0;
         const newEasy = parseFloat(document.getElementById('init-easycard').value) || 0;
         
-        // 將馬幣轉換為 TWD 寫入資料庫
         const newMaybankTwd = Math.round(newMaybankMyr * myrToTwdRate);
         const newSavingsTwd = Math.round(newSavingsMyr * myrToTwdRate);
 
         const ts = Date.now();
         db.transactions.push({ id: ts, timestamp: ts, type: 'adjust', singleAcc: 'post', amount: newPost, note: '系統校正' });
         db.transactions.push({ id: ts+1, timestamp: ts+1, type: 'adjust', singleAcc: 'cash', amount: newCash, note: '系統校正' });
-        db.transactions.push({ id: ts+2, timestamp: ts+2, type: 'adjust', singleAcc: 'maybank', amount: newMaybankTwd, note: '系統校正' });
-        db.transactions.push({ id: ts+3, timestamp: ts+3, type: 'adjust', singleAcc: 'savings', amount: newSavingsTwd, note: '系統校正' });
+        db.transactions.push({ id: ts+2, timestamp: ts+2, type: 'adjust', singleAcc: 'maybank', amount: newMaybankTwd, originalMyr: newMaybankMyr, note: '系統校正' });
+        db.transactions.push({ id: ts+3, timestamp: ts+3, type: 'adjust', singleAcc: 'savings', amount: newSavingsTwd, originalMyr: newSavingsMyr, note: '系統校正' });
         db.transactions.push({ id: ts+4, timestamp: ts+4, type: 'adjust', singleAcc: 'easycard', amount: newEasy, note: '系統校正' });
         
         saveDB(); 
