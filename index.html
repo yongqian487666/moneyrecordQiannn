@@ -1012,7 +1012,7 @@
         totEl.innerText = `$ ${isInc ? '+' : '-'}${total.toLocaleString()}`;
         const list = document.getElementById('cat-detail-list');
         list.innerHTML = catTxs.length === 0 ? '<div style="text-align:center; padding: 20px; color: var(--text-light); font-size: 14px;">查無記錄</div>' : '';
-        catTxs.forEach(tx => list.insertAdjacentHTML('beforeend', generateTxHTML(tx, false)));
+        catTxs.forEach(tx => list.insertAdjacentHTML('beforeend', generateTxHTML(tx, false, true)));
         const m = document.getElementById('category-detail-modal'); m.style.display = 'flex'; setTimeout(() => m.classList.add('show'), 10); trackModal(true);
     }
     function closeCategoryDetailModal() {
@@ -1069,7 +1069,8 @@
         else if (tx.type === 'income') { amountText = `+ ${tx.amount}`; metaText = `存入 ${accNames[tx.singleAcc]}`; }
         else if (tx.type === 'transfer') { amountText = `${tx.amount}`; metaText = `${accNames[tx.fromAcc]} -> ${accNames[tx.toAcc]}`; }
         const d = new Date(tx.timestamp), timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        const dateStr = hideDate ? timeStr : `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${timeStr}`;
+        const mdStr = `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+        const dateStr = hideDate ? timeStr : (hideTime ? mdStr : `${mdStr} ${timeStr}`);
         const catTag = (tx.type !== 'transfer' && tx.category) ? `${tx.category} | ` : '';
         const titleText = tx.note || tx.category || (tx.type === 'transfer' ? '轉帳' : '未分類');
         return `<div class="tx-item-wrapper" id="tx-wrapper-${tx.id}"><div class="tx-actions"><div class="tx-btn tx-btn-edit" onclick="editTx(${tx.id})">編輯</div><div class="tx-btn tx-btn-del" onclick="delTx(${tx.id})">刪除</div></div><div class="tx-item type-${tx.type}" id="tx-item-${tx.id}" ontouchstart="swStart(event)" ontouchmove="swMove(event)" ontouchend="swEnd(event)"><div class="tx-left-group"><div class="tx-cat-icon"><svg viewBox="0 0 24 24">${getCategorySvg(tx.category, tx.type)}</svg></div><div class="tx-left"><div class="tx-title">${titleText}</div><div class="tx-meta">${dateStr} | ${catTag}${metaText}</div></div></div><div class="tx-right">${amountText}</div></div></div>`;
