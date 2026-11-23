@@ -57,11 +57,11 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, '微軟正黑體', sans-serif; user-select: none; }
         
         /* 隱藏所有捲軸線條，保留滑動功能 */
-        html, body, .modal-body, #adjust-history-list, .custom-options {
+        html, body, .modal-body, #adjust-history-list, #cat-detail-list, .custom-options {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-        html::-webkit-scrollbar, body::-webkit-scrollbar, .modal-body::-webkit-scrollbar, #adjust-history-list::-webkit-scrollbar, .custom-options::-webkit-scrollbar {
+        html::-webkit-scrollbar, body::-webkit-scrollbar, .modal-body::-webkit-scrollbar, #adjust-history-list::-webkit-scrollbar, #cat-detail-list::-webkit-scrollbar, .custom-options::-webkit-scrollbar {
             display: none;
         }
 
@@ -98,7 +98,8 @@
         .snowflake:nth-child(9) { left: 85%; animation-duration: 12s, 4s; animation-delay: 2.5s, 1s; font-size: 24px; }
         .snowflake:nth-child(10) { left: 95%; animation-duration: 10s, 3s; animation-delay: 4.5s, 2s; font-size: 18px; }
 
-        .bg-decor { position: fixed; bottom: 160px; right: -20px; opacity: 0.35; pointer-events: none; z-index: 0; width: 220px; }
+        .bg-decor { position: fixed; bottom: 140px; right: -10px; opacity: 0.42; pointer-events: none; z-index: 0; width: 230px; }
+        body.dark-mode .bg-decor { opacity: 0.25; }
 
         .app-container { 
             max-width: 480px; 
@@ -182,7 +183,7 @@
         .arrow { transition: transform 0.3s; color: var(--text-light); font-size: 12px; }
         .history-controls { display: flex; gap: 8px; }
         
-        /* 當日加總卡片 */
+        /* 加總卡片 */
         .daily-summary-card {
             background: var(--card-bg);
             border-radius: 14px;
@@ -200,9 +201,9 @@
         .daily-summary-total.zero { color: var(--text-light); }
 
         .tx-list { display: flex; flex-direction: column; gap: 12px; overflow: hidden; max-height: 0; transition: max-height 0.4s cubic-bezier(0, 1, 0, 1); margin-top: 10px; }
-        .tx-list.expanded { max-height: 2500px; transition: max-height 0.5s ease-in-out; }
+        .tx-list.expanded { max-height: 5000px; transition: max-height 0.5s ease-in-out; }
         
-        .tx-item-wrapper { position: relative; overflow: hidden; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); background-color: var(--card-bg); height: 75px; } 
+        .tx-item-wrapper { position: relative; overflow: hidden; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); background-color: var(--card-bg); height: 76px; } 
         
         .tx-actions { position: absolute; top: 0; bottom: 0; right: 0; display: flex; z-index: 1; }
         .tx-btn { width: 65px; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 14px; cursor: pointer; }
@@ -220,11 +221,36 @@
 
         .tx-left { display: flex; flex-direction: column; text-align: left; pointer-events: none; justify-content: center;}
         .tx-title { font-size: 16px; font-weight: bold; margin-bottom: 4px; line-height: 1.2;}
-        .tx-meta { font-size: 12px; color: var(--text-light); }
+        .tx-meta { font-size: 13.5px; color: var(--text-light); }
         .tx-right { font-size: 18px; font-weight: bold; text-align: right; pointer-events: none; display: flex; align-items: center;}
         .type-expense .tx-right { color: var(--expense); }
         .type-income .tx-right { color: var(--accent); }
         .type-transfer .tx-right { color: var(--transfer); }
+
+        /* 類別統計列表卡片（PieChart 模式下使用） */
+        .cat-summary-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+        .cat-summary-card:active { transform: scale(0.98); }
+        .cat-summary-left { display: flex; align-items: center; gap: 12px; }
+        .cat-summary-icon {
+            width: 38px; height: 38px; border-radius: 12px;
+            display: flex; justify-content: center; align-items: center;
+            color: white; flex-shrink: 0;
+        }
+        .cat-summary-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .cat-summary-name { font-size: 15px; font-weight: bold; color: var(--text-main); margin-bottom: 2px; }
+        .cat-summary-pct { font-size: 12.5px; color: var(--text-light); font-weight: bold; }
+        .cat-summary-right { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 900; color: var(--expense); }
+        .cat-summary-arrow { color: var(--text-light); font-size: 13px; }
 
         .ledger-summary { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
         .ledger-summary-item { flex: 1; background: var(--card-bg); border-radius: 16px; padding: 15px 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
@@ -241,12 +267,34 @@
         .ledger-filter-controls { display: flex; gap: 8px; }
 
         .chart-card { background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .chart-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;}
+        .chart-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .chart-card-title { font-size: 16px; font-weight: bold; color: var(--text-main); }
-        .time-range-btns { display: flex; background: var(--border-color); border-radius: 10px; overflow: hidden; }
-        .time-btn { padding: 6px 10px; font-size: 12px; border: none; background: transparent; color: var(--text-light); cursor: pointer; transition: 0.2s; font-weight: bold; }
+        .chart-toggle-btn {
+            display: flex; align-items: center; gap: 5px;
+            background: rgba(123, 202, 245, 0.16); color: var(--accent);
+            border: 1.5px solid var(--accent); border-radius: 10px;
+            padding: 5px 10px; font-size: 12px; font-weight: bold; cursor: pointer;
+            transition: 0.2s;
+        }
+        .chart-toggle-btn:active { transform: scale(0.95); }
+        .chart-toggle-btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        .time-range-btns { display: flex; background: var(--border-color); border-radius: 10px; overflow: hidden; margin-bottom: 15px; }
+        .time-btn { flex: 1; padding: 7px 4px; font-size: 12px; border: none; background: transparent; color: var(--text-light); cursor: pointer; transition: 0.2s; font-weight: bold; text-align: center; }
         .time-btn.active { background: var(--accent); color: white; }
-        .line-chart-container { position: relative; height: 200px; width: 100%; }
+        .line-chart-container { position: relative; height: 220px; width: 100%; }
+        .doughnut-center-label {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+            display: none;
+        }
+        .doughnut-center-label.show { display: block; }
+        .doughnut-center-title { font-size: 13px; color: var(--text-light); font-weight: bold; margin-bottom: 3px; }
+        .doughnut-center-val { font-size: 20px; color: var(--text-main); font-weight: 900; }
+
         .chart-description { margin-top: 15px; font-size: 13px; color: var(--text-light); line-height: 1.5; background: rgba(0,0,0,0.03); padding: 12px; border-radius: 12px; }
         .chart-description strong { color: var(--text-main); font-weight: bold; }
 
@@ -302,7 +350,7 @@
         }
         .modal.show .modal-content { transform: translateY(0); }
         
-        .modal-body { max-height: calc(85dvh - 80px); overflow-y: auto; padding-right: 2px; }
+        .modal-body { max-height: calc(85dvh - 80px); overflow-y: auto; padding: 0 2px; }
 
         .modal-decor { position: absolute; top: -65px; left: 50%; transform: translateX(-50%); width: 190px; height: auto; pointer-events: none; z-index: 1001; }
 
@@ -344,11 +392,12 @@
             letter-spacing: 0.5px;
         }
 
-        /* 付款帳戶格子 (5 欄) */
+        /* 付款帳戶格子 (5 欄，移除 scale 避免邊緣裁切) */
         .acc-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 8px;
+            padding: 1px;
         }
         .acc-grid-item {
             padding: 11px 4px;
@@ -360,21 +409,21 @@
             font-weight: bold;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
             white-space: nowrap;
         }
         .acc-grid-item.active {
             border-color: var(--accent);
             background: rgba(123, 202, 245, 0.16);
             color: var(--accent);
-            transform: scale(1.03);
         }
 
-        /* 類別選擇網格 */
+        /* 類別選擇網格 (移除 scale 避免邊緣裁切) */
         .category-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 8px;
+            padding: 1px;
         }
         .category-grid.cols-4 {
             grid-template-columns: repeat(4, 1fr);
@@ -390,7 +439,7 @@
             background: transparent;
             color: var(--text-light);
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
             gap: 5px;
         }
         .cat-item svg {
@@ -411,7 +460,6 @@
             border-color: var(--accent);
             background: rgba(123, 202, 245, 0.16);
             color: var(--accent);
-            transform: scale(1.03);
         }
 
         /* 自訂計算機樣式 */
@@ -497,7 +545,7 @@
 
         .history-record-item { background: var(--bg-bottom); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; text-align: left; }
         .history-record-time { font-size: 12px; color: var(--text-light); margin-bottom: 5px; font-weight: bold; }
-        .history-record-detail { font-size: 14px; font-weight: bold; color: var(--text-main); line-height: 1.4; }
+        .history-record-detail { font-size: 14px; font-weight: bold; color: var(--text-main); line-height: 1.5; }
 
         .prompt-content { background: var(--card-bg); width: 85%; max-width: 320px; border-radius: 20px; padding: 25px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: scale(0.9); opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .custom-prompt.show .prompt-content { transform: scale(1); opacity: 1; }
@@ -543,20 +591,58 @@
     <div class="snowflake">&#10054;</div><div class="snowflake">&#10054;</div><div class="snowflake">&#10054;</div><div class="snowflake">&#10054;</div><div class="snowflake">&#10054;</div>
 </div>
 
-<svg class="bg-decor" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-    <g transform="translate(150, 150) rotate(-8)" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.5">
-        <path d="M-80,-60 Q-60,-60 -60,-80 Q-60,-60 -40,-60 Q-60,-60 -60,-40 Q-60,-60 -80,-60 Z" stroke="#aaddf9" fill="#ffffff" opacity="0.8"/>
-        <path d="M60,70 Q75,70 75,55 Q75,70 90,70 Q75,70 75,85 Q75,70 60,70 Z" stroke="#aaddf9" fill="#ffffff" opacity="0.8"/>
-        <path d="M-50,110 Q-35,110 -35,95 Q-35,110 -20,110 Q-35,110 -35,125 Q-35,110 -50,110 Z" stroke="#aaddf9" fill="#ffffff" opacity="0.8"/>
-        <ellipse cx="0" cy="-80" rx="35" ry="12" stroke="#aaddf9" transform="rotate(-10 0 -80)"/>
-        <path d="M-50,10 C-80,0 -90,-10 -110,-5 C-125,5 -115,25 -95,30 C-100,45 -80,55 -60,40" stroke="#aaddf9" fill="var(--card-bg)"/>
-        <path d="M-90,15 C-80,15 -80,25 -90,25" stroke="#aaddf9"/>
-        <path d="M50,0 C80,-10 90,-20 110,-15 C125,-5 115,15 95,20 C100,35 80,45 60,30" stroke="#aaddf9" fill="var(--card-bg)"/>
-        <path d="M90,5 C80,5 80,15 90,15" stroke="#aaddf9"/>
-        <path d="M -5,-55 C 15,-20 15,-20 35,-15 C 55,-10 70,-10 50,10 C 35,25 40,30 45,55 C 50,70 25,50 0,60 C -20,65 -30,50 -35,35 C -40,15 -55,0 -30,-15 C -15,-25 -20,-20 -5,-55 Z" stroke="#eed17d" fill="var(--card-bg)"/>
-        <path d="M -16,5 L -10,20" stroke="#d4ab4a" stroke-width="7"/>
-        <path d="M 12,5 L 18,20" stroke="#d4ab4a" stroke-width="7"/>
-        <path d="M -8,28 L 1,36 L 10,28" stroke="#d4ab4a" stroke-width="5.5"/>
+<!-- 手繪風躺著拿銅鑼燒的哆啦A夢背景 -->
+<svg class="bg-decor" viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="#245c91" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+        <!-- 身體 (側躺姿勢) -->
+        <path d="M 145,195 C 185,220 245,215 268,182 C 282,162 275,130 248,124 C 228,120 212,135 202,150" fill="#89c9ee"/>
+        <!-- 肚子白色區塊 -->
+        <path d="M 192,188 C 212,202 245,195 258,174 C 266,160 258,140 240,138 C 224,136 210,152 200,165 Z" fill="#ffffff"/>
+        <!-- 百寶袋 -->
+        <path d="M 218,162 C 226,174 242,175 248,163" fill="none" stroke-width="4"/>
+        <!-- 舉起拿銅鑼燒的右手臂 -->
+        <path d="M 195,126 C 208,112 222,102 228,88 C 236,92 246,102 240,115 C 232,130 218,142 204,148" fill="#89c9ee"/>
+        <!-- 右手圓手掌 -->
+        <circle cx="236" cy="86" r="14" fill="#ffffff"/>
+        <!-- 銅鑼燒 -->
+        <g transform="translate(232, 56) rotate(-18)">
+            <ellipse cx="0" cy="0" rx="22" ry="16" fill="#4b3a5a"/>
+            <ellipse cx="-2" cy="0" rx="18" ry="14" fill="#ffe184"/>
+            <ellipse cx="5" cy="-1" rx="16" ry="13" fill="#eb9b52"/>
+        </g>
+        <!-- 腳 -->
+        <ellipse cx="268" cy="182" rx="22" ry="14" transform="rotate(-25 268 182)" fill="#ffffff"/>
+        <!-- 紅色項圈 -->
+        <path d="M 148,188 C 166,172 182,150 194,126" fill="none" stroke="#f27d7d" stroke-width="10"/>
+        <path d="M 148,188 C 166,172 182,150 194,126" fill="none" stroke="#245c91" stroke-width="3.5" stroke-dasharray="1 180"/>
+        <!-- 黃色鈴鐺 -->
+        <circle cx="185" cy="152" r="13" fill="#ffe57f"/>
+        <path d="M 174,148 Q 185,154 196,148" fill="none" stroke-width="3.5"/>
+        <circle cx="185" cy="157" r="2.5" fill="#245c91" stroke="none"/>
+        <!-- 頭部藍色輪廓 (歪頭躺著) -->
+        <circle cx="122" cy="118" r="68" fill="#89c9ee"/>
+        <!-- 臉部白色區塊 -->
+        <path d="M 105,65 C 148,58 182,88 180,128 C 178,162 146,184 112,178 C 78,172 62,140 72,106 C 78,86 90,70 105,65 Z" fill="#ffffff"/>
+        <!-- 左眼 (閉眼微笑) -->
+        <ellipse cx="92" cy="86" rx="15" ry="18" transform="rotate(-28 92 86)" fill="#ffffff"/>
+        <path d="M 85,86 Q 92,79 99,86" fill="none" stroke-width="4"/>
+        <!-- 右眼 (閉眼微笑) -->
+        <ellipse cx="116" cy="70" rx="14" ry="17" transform="rotate(-28 116 70)" fill="#ffffff"/>
+        <path d="M 109,70 Q 116,63 123,70" fill="none" stroke-width="4"/>
+        <!-- 紅鼻子 -->
+        <circle cx="115" cy="88" r="10.5" fill="#f27d7d"/>
+        <circle cx="112" cy="85" r="2.5" fill="#ffffff" stroke="none"/>
+        <!-- 嘴巴中線與微笑大嘴 -->
+        <path d="M 122,97 L 146,125" fill="none" stroke-width="4"/>
+        <path d="M 96,148 C 122,165 156,150 164,120" fill="none" stroke-width="4.5"/>
+        <!-- 左邊三根鬍鬚 -->
+        <path d="M 86,112 L 106,105" fill="none" stroke-width="3.8"/>
+        <path d="M 88,125 L 111,114" fill="none" stroke-width="3.8"/>
+        <path d="M 95,137 L 118,123" fill="none" stroke-width="3.8"/>
+        <!-- 右邊三根鬍鬚 -->
+        <path d="M 134,82 L 146,66" fill="none" stroke-width="3.8"/>
+        <path d="M 142,91 L 160,77" fill="none" stroke-width="3.8"/>
+        <path d="M 148,101 L 168,92" fill="none" stroke-width="3.8"/>
     </g>
 </svg>
 
@@ -646,27 +732,36 @@
         </div>
 
         <div class="chart-card">
-            <div class="chart-card-header">
-                <span class="chart-card-title">消費趨勢</span>
-                <div class="time-range-btns">
-                    <button class="time-btn" id="btn-range-7" onclick="setLedgerRange(7)">7天</button>
-                    <button class="time-btn" id="btn-range-15" onclick="setLedgerRange(15)">半月</button>
-                    <button class="time-btn active" id="btn-range-30" onclick="setLedgerRange(30)">本月</button>
-                    <button class="time-btn" id="btn-range-365" onclick="setLedgerRange(365)">本年</button>
-                </div>
+            <div class="chart-card-top">
+                <span class="chart-card-title" id="ledger-chart-title">消費趨勢</span>
+                <button class="chart-toggle-btn" id="chart-toggle-btn" onclick="toggleLedgerChartType()">
+                    <svg viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                    <span>類別比例</span>
+                </button>
+            </div>
+            <div class="time-range-btns">
+                <button class="time-btn" id="btn-range-7" onclick="setLedgerRange(7)">7天</button>
+                <button class="time-btn" id="btn-range-15" onclick="setLedgerRange(15)">半月</button>
+                <button class="time-btn active" id="btn-range-30" onclick="setLedgerRange(30)">本月</button>
+                <button class="time-btn" id="btn-range-365" onclick="setLedgerRange(365)">本年</button>
+                <button class="time-btn" id="btn-range-all" onclick="setLedgerRange('all')">全部</button>
             </div>
             <div class="line-chart-container">
                 <canvas id="lineChart"></canvas>
+                <div class="doughnut-center-label" id="doughnut-center-label">
+                    <div class="doughnut-center-title">總支出</div>
+                    <div class="doughnut-center-val" id="doughnut-center-val">$ 0</div>
+                </div>
             </div>
             <div class="chart-description" id="chart-desc"></div>
         </div>
 
-        <div class="ledger-filter-bar">
+        <div class="ledger-filter-bar" id="ledger-filter-bar">
             <div class="ledger-filter-row" style="margin-bottom: 5px;">
-                <span class="ledger-filter-title">交易明細</span>
+                <span class="ledger-filter-title" id="ledger-detail-title">交易明細</span>
                 <input type="text" id="ledger-search" class="search-input" placeholder="搜尋備註或類別..." oninput="renderApp()">
             </div>
-            <div class="ledger-filter-row" style="justify-content: flex-end;">
+            <div class="ledger-filter-row" id="ledger-filter-controls-row" style="justify-content: flex-end;">
                 <div class="ledger-filter-controls">
                     <div class="custom-select-wrapper inline" id="ledger-filter-wrapper">
                         <div class="custom-select inline" onclick="toggleSelect('ledger-filter-wrapper')">全部</div>
@@ -798,7 +893,7 @@
         <div class="modal-body">
             <h3 id="modal-title" style="text-align: center; margin-bottom: 16px; font-weight: bold; color: var(--text-main); display: none;">編輯交易</h3>
             
-            <!-- 1. 日期（自訂左右箭頭與日曆 UI） -->
+            <!-- 1. 日期 -->
             <div class="form-group">
                 <label>日期</label>
                 <div class="modal-date-bar">
@@ -815,7 +910,7 @@
                 <button class="type-btn" id="tab-income" onclick="setTxType('income')">收入</button>
             </div>
 
-            <!-- 3. 付款/收款帳戶（格子選擇） -->
+            <!-- 3. 付款/收款帳戶 -->
             <div class="form-group" id="group-single-acc">
                 <label id="label-single-acc">付款帳戶</label>
                 <div class="acc-grid" id="tx-single-acc-grid"></div>
@@ -905,6 +1000,19 @@
     </div>
 </div>
 
+<!-- 類別明細視窗（PieChart 點擊類別開啟） -->
+<div class="modal" id="category-detail-modal" onclick="closeCategoryDetailModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 id="cat-detail-title" style="margin-bottom: 12px; font-weight: bold; text-align: center;">類別明細</h3>
+        <div class="daily-summary-card" style="margin-bottom: 14px; background: var(--bg-bottom);">
+            <span class="daily-summary-date" id="cat-detail-range">本月</span>
+            <span class="daily-summary-total neg" id="cat-detail-total">$ 0</span>
+        </div>
+        <div id="cat-detail-list" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;"></div>
+        <button class="btn-cancel" style="width: 100%; margin-top: 18px; border-radius: 12px;" onclick="closeCategoryDetailModal()">關閉明細</button>
+    </div>
+</div>
+
 <!-- 自訂 刪除確認視窗 -->
 <div class="custom-prompt" id="custom-confirm">
     <div class="prompt-content">
@@ -990,26 +1098,26 @@
     const isMyrAcc = (acc) => acc === 'maybank' || acc === 'savings';
     const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
 
-    // 支出類別 (10)
+    // 支出類別 (10) + 圓餅圖專屬色盤
     const expenseCategories = [
-        { name: '早午晚餐', svg: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>' },
-        { name: '自煮', svg: '<path d="M2 12h20"/><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="m4 8 16-4"/><path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8"/>' },
-        { name: '零食', svg: '<path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/>' },
-        { name: '日常用品', svg: '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>' },
-        { name: '購物', svg: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>' },
-        { name: '交通', svg: '<path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>' },
-        { name: '日常費用', svg: '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/>' },
-        { name: '行政費', svg: '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>' },
-        { name: '其他', svg: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>' },
-        { name: '旅行', svg: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>' }
+        { name: '早午晚餐', color: '#e65c72', svg: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>' },
+        { name: '自煮', color: '#f3b749', svg: '<path d="M2 12h20"/><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="m4 8 16-4"/><path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8"/>' },
+        { name: '零食', color: '#eb8f47', svg: '<path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/>' },
+        { name: '日常用品', color: '#4794a8', svg: '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>' },
+        { name: '購物', color: '#61d095', svg: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>' },
+        { name: '交通', color: '#5a94f0', svg: '<path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>' },
+        { name: '日常費用', color: '#9c78eb', svg: '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/>' },
+        { name: '行政費', color: '#e16eb8', svg: '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>' },
+        { name: '其他', color: '#a8b0b8', svg: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>' },
+        { name: '旅行', color: '#45b7d1', svg: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>' }
     ];
 
     // 收入類別 (4)
     const incomeCategories = [
-        { name: '薪水', svg: '<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>' },
-        { name: '交易', svg: '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>' },
-        { name: '生活費', svg: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>' },
-        { name: '其他', svg: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>' }
+        { name: '薪水', color: '#7bcaf5', svg: '<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>' },
+        { name: '交易', color: '#61d095', svg: '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>' },
+        { name: '生活費', color: '#f3b749', svg: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>' },
+        { name: '其他', color: '#a8b0b8', svg: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>' }
     ];
     const transferIconSvg = '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>';
 
@@ -1017,9 +1125,10 @@
     let currentType = 'expense';
     let currentPage = 'home';
     let myPieChart = null;
-    let myLineChart = null;
+    let myLedgerChart = null;
+    let ledgerChartType = 'line'; // 'line' 或 'pie'
     let isHistoryExpanded = true;
-    let ledgerRangeDays = 30;
+    let ledgerRangeDays = 30; // 7 | 15 | 30 | 365 | 'all'
     
     let editingTxId = null;
     let targetDeleteId = null; 
@@ -1030,7 +1139,7 @@
     let viewingDate = new Date();
     let txModalDate = new Date();
     let calDate = new Date(); 
-    let calendarTarget = 'main'; // 'main' 或 'tx'
+    let calendarTarget = 'main';
     
     let db = JSON.parse(localStorage.getItem('pure_money_db')) || { 
         transactions: [],
@@ -1049,14 +1158,16 @@
         return `${y}-${m}-${d}`;
     }
 
-    function getCategorySvg(catName, type) {
-        if (type === 'transfer') return transferIconSvg;
+    function getCategoryObj(catName, type) {
         const list = type === 'income' ? incomeCategories : expenseCategories;
-        const found = list.find(c => c.name === catName) || expenseCategories.find(c => c.name === catName) || incomeCategories.find(c => c.name === catName);
-        return found ? found.svg : expenseCategories[8].svg;
+        return list.find(c => c.name === catName) || expenseCategories.find(c => c.name === catName) || incomeCategories.find(c => c.name === catName) || expenseCategories[8];
     }
 
-    // 渲染帳戶格子
+    function getCategorySvg(catName, type) {
+        if (type === 'transfer') return transferIconSvg;
+        return getCategoryObj(catName, type).svg;
+    }
+
     function renderAccountGrid() {
         const currentAcc = document.getElementById('tx-single-acc').value || 'cash';
         const grid = document.getElementById('tx-single-acc-grid');
@@ -1075,7 +1186,6 @@
         });
     }
 
-    // 渲染類別格子
     function renderCategoryGrid() {
         const grid = document.getElementById('category-grid');
         const list = currentType === 'income' ? incomeCategories : expenseCategories;
@@ -1169,7 +1279,6 @@
         }
     }
 
-    // --- 彈窗內日期控制 ---
     function formatTxDate() {
         const y = txModalDate.getFullYear();
         const m = String(txModalDate.getMonth() + 1).padStart(2, '0');
@@ -1377,6 +1486,7 @@
 
     function editTx(id) {
         resetAllSwipes();
+        closeCategoryDetailModal();
         const tx = db.transactions.find(t => t.id === id);
         if(!tx) return;
         
@@ -1435,6 +1545,7 @@
         if (targetDeleteId !== null) {
             db.transactions = db.transactions.filter(t => t.id !== targetDeleteId);
             saveDB();
+            closeCategoryDetailModal();
             renderApp();
         }
         closeConfirmModal();
@@ -1590,42 +1701,191 @@
         renderApp();
     }
 
-    function updateLineChart(txList) {
-        const ctx = document.getElementById('lineChart');
-        const isDark = document.body.classList.contains('dark-mode');
-        
-        let startDate, endDate;
-        let isYearView = ledgerRangeDays === 365;
-        
-        if (isYearView) {
-            startDate = new Date(viewingDate.getFullYear(), 0, 1);
-            endDate = new Date(viewingDate.getFullYear(), 11, 31, 23, 59, 59, 999);
+    function toggleLedgerChartType() {
+        ledgerChartType = ledgerChartType === 'line' ? 'pie' : 'line';
+        const btn = document.getElementById('chart-toggle-btn');
+        const title = document.getElementById('ledger-chart-title');
+        if (ledgerChartType === 'pie') {
+            title.innerText = '類別比例';
+            btn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>消費趨勢</span>';
+        } else {
+            title.innerText = '消費趨勢';
+            btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg><span>類別比例</span>';
+        }
+        renderApp();
+    }
+
+    // 統一計算查帳區間的起訖時間與標籤
+    function getLedgerRangeInfo() {
+        const y = viewingDate.getFullYear();
+        const m = viewingDate.getMonth();
+        let startDate, endDate, labelPrefix, rangeTitle;
+
+        if (ledgerRangeDays === 'all') {
+            const validTxs = db.transactions.filter(tx => tx.type !== 'adjust');
+            if (validTxs.length > 0) {
+                const minTs = Math.min(...validTxs.map(t => t.timestamp));
+                const maxTs = Math.max(...validTxs.map(t => t.timestamp));
+                startDate = new Date(minTs);
+                startDate.setHours(0, 0, 0, 0);
+                endDate = new Date(maxTs);
+                endDate.setHours(23, 59, 59, 999);
+            } else {
+                startDate = new Date(viewingDate);
+                startDate.setHours(0, 0, 0, 0);
+                endDate = new Date(viewingDate);
+                endDate.setHours(23, 59, 59, 999);
+            }
+            labelPrefix = '全部';
+            rangeTitle = '全部記錄';
+        } else if (ledgerRangeDays === 365) {
+            startDate = new Date(y, 0, 1, 0, 0, 0, 0);
+            endDate = new Date(y, 11, 31, 23, 59, 59, 999);
+            labelPrefix = '本年';
+            rangeTitle = `${y}年`;
         } else if (ledgerRangeDays === 30) {
-            startDate = new Date(viewingDate.getFullYear(), viewingDate.getMonth(), 1);
-            endDate = new Date(viewingDate.getFullYear(), viewingDate.getMonth() + 1, 0, 23, 59, 59, 999);
+            startDate = new Date(y, m, 1, 0, 0, 0, 0);
+            endDate = new Date(y, m + 1, 0, 23, 59, 59, 999);
+            labelPrefix = '本月';
+            rangeTitle = `${y}/${String(m + 1).padStart(2, '0')} 本月`;
         } else {
             endDate = new Date(viewingDate);
             endDate.setHours(23, 59, 59, 999);
             startDate = new Date(viewingDate);
             startDate.setDate(endDate.getDate() - ledgerRangeDays + 1);
-            startDate.setHours(0,0,0,0);
+            startDate.setHours(0, 0, 0, 0);
+            labelPrefix = `近${ledgerRangeDays}天`;
+            const sm = String(startDate.getMonth() + 1).padStart(2, '0');
+            const sd = String(startDate.getDate()).padStart(2, '0');
+            const em = String(endDate.getMonth() + 1).padStart(2, '0');
+            const ed = String(endDate.getDate()).padStart(2, '0');
+            rangeTitle = `${sm}/${sd} - ${em}/${ed}`;
         }
 
+        return {
+            startDate,
+            endDate,
+            startMs: startDate.getTime(),
+            endMs: endDate.getTime(),
+            labelPrefix,
+            rangeTitle
+        };
+    }
+
+    function updateLedgerChart(rangeTx, rangeInfo) {
+        const ctx = document.getElementById('lineChart');
+        const isDark = document.body.classList.contains('dark-mode');
+        const centerLabel = document.getElementById('doughnut-center-label');
+        const centerVal = document.getElementById('doughnut-center-val');
+
+        if (myLedgerChart) {
+            myLedgerChart.destroy();
+            myLedgerChart = null;
+        }
+
+        if (ledgerChartType === 'pie') {
+            // 類別圓餅圖 (甜甜圈圖)
+            const catMap = {};
+            let totalExp = 0;
+            rangeTx.forEach(tx => {
+                if (tx.type === 'expense') {
+                    const cat = tx.category || '其他';
+                    catMap[cat] = (catMap[cat] || 0) + tx.amount;
+                    totalExp += tx.amount;
+                }
+            });
+
+            const sortedCats = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+            const labels = sortedCats.length ? sortedCats.map(c => c[0]) : ['無支出'];
+            const dataVals = sortedCats.length ? sortedCats.map(c => c[1]) : [1];
+            const bgColors = sortedCats.length
+                ? sortedCats.map(c => getCategoryObj(c[0], 'expense').color)
+                : [isDark ? '#334150' : '#e5edf3'];
+
+            centerLabel.classList.add('show');
+            centerVal.innerText = `$ ${totalExp.toLocaleString()}`;
+
+            myLedgerChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataVals,
+                        backgroundColor: bgColors,
+                        borderWidth: 2,
+                        borderColor: isDark ? '#1e2832' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '64%',
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (!sortedCats.length) return ' 0';
+                                    const val = dataVals[context.dataIndex];
+                                    const pct = totalExp > 0 ? ((val / totalExp) * 100).toFixed(1) : 0;
+                                    return ` ${labels[context.dataIndex]}: $${val.toLocaleString()} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            if (sortedCats.length > 0) {
+                const top = sortedCats[0];
+                const topPct = ((top[1] / totalExp) * 100).toFixed(1);
+                document.getElementById('chart-desc').innerHTML = `${rangeInfo.labelPrefix}共支出 <strong>${totalExp.toLocaleString()}</strong> 元，最大支出類別為 <strong>${top[0]}</strong>（${topPct}%）。點擊下方類別可查看明細。`;
+            } else {
+                document.getElementById('chart-desc').innerHTML = `${rangeInfo.labelPrefix}尚無支出記錄。`;
+            }
+            return { sortedCats, totalExp };
+        }
+
+        // 折線圖 (Time Series)
+        centerLabel.classList.remove('show');
+        const { startDate, endDate } = rangeInfo;
         const dateLabels = [];
         const expenseData = [];
         let totalExp = 0;
-        
-        if (isYearView) {
+
+        const daySpan = Math.max(1, Math.round((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1);
+        const groupByMonth = (ledgerRangeDays === 365) || (ledgerRangeDays === 'all' && daySpan > 90);
+
+        if (ledgerRangeDays === 365) {
             for (let i = 1; i <= 12; i++) {
                 dateLabels.push(`${i}月`);
                 expenseData.push(0);
             }
-            txList.forEach(tx => {
-                if (tx.type === 'expense' && tx.timestamp >= startDate.getTime() && tx.timestamp <= endDate.getTime()) {
-                    const txDate = new Date(tx.timestamp);
-                    const monthIdx = txDate.getMonth(); 
+            rangeTx.forEach(tx => {
+                if (tx.type === 'expense') {
+                    const monthIdx = new Date(tx.timestamp).getMonth();
                     expenseData[monthIdx] += tx.amount;
                     totalExp += tx.amount;
+                }
+            });
+        } else if (groupByMonth) {
+            let curr = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+            const endMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+            while (curr <= endMonth) {
+                dateLabels.push(`${curr.getFullYear()}/${String(curr.getMonth() + 1).padStart(2, '0')}`);
+                expenseData.push(0);
+                curr.setMonth(curr.getMonth() + 1);
+            }
+            rangeTx.forEach(tx => {
+                if (tx.type === 'expense') {
+                    const d = new Date(tx.timestamp);
+                    const lbl = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+                    const idx = dateLabels.indexOf(lbl);
+                    if (idx !== -1) {
+                        expenseData[idx] += tx.amount;
+                        totalExp += tx.amount;
+                    }
                 }
             });
         } else {
@@ -1637,12 +1897,10 @@
                 expenseData.push(0);
                 curr.setDate(curr.getDate() + 1);
             }
-            txList.forEach(tx => {
-                if (tx.type === 'expense' && tx.timestamp >= startDate.getTime() && tx.timestamp <= endDate.getTime()) {
+            rangeTx.forEach(tx => {
+                if (tx.type === 'expense') {
                     const txDate = new Date(tx.timestamp);
-                    const m = String(txDate.getMonth() + 1).padStart(2, '0');
-                    const d = String(txDate.getDate()).padStart(2, '0');
-                    const label = `${m}/${d}`;
+                    const label = `${String(txDate.getMonth() + 1).padStart(2, '0')}/${String(txDate.getDate()).padStart(2, '0')}`;
                     const idx = dateLabels.indexOf(label);
                     if (idx !== -1) {
                         expenseData[idx] += tx.amount;
@@ -1652,64 +1910,82 @@
             });
         }
 
-        let rangeText = "";
-        let avgText = "";
-        if (isYearView) {
-            rangeText = "今年";
-            const avg = Math.round(totalExp / 12);
-            avgText = `平均每月消費約 <strong>${avg.toLocaleString()}</strong> 元`;
+        let avgText = '';
+        if (ledgerRangeDays === 365) {
+            avgText = `平均每月消費約 <strong>${Math.round(totalExp / 12).toLocaleString()}</strong> 元`;
         } else {
-            const avg = Math.round(totalExp / ledgerRangeDays);
-            rangeText = ledgerRangeDays === 30 ? "這個月" : (ledgerRangeDays === 15 ? "這半個月" : `這 ${ledgerRangeDays} 天`);
-            avgText = `平均每日消費約 <strong>${avg.toLocaleString()}</strong> 元`;
+            avgText = `平均每日消費約 <strong>${Math.round(totalExp / daySpan).toLocaleString()}</strong> 元`;
         }
-        document.getElementById('chart-desc').innerHTML = `${rangeText}的總支出為 <strong>${totalExp.toLocaleString()}</strong> 元，${avgText}。`;
+        document.getElementById('chart-desc').innerHTML = `${rangeInfo.labelPrefix}的總支出為 <strong>${totalExp.toLocaleString()}</strong> 元，${avgText}。`;
 
-        if (myLineChart) {
-            myLineChart.data.labels = dateLabels;
-            myLineChart.data.datasets[0].data = expenseData;
-            myLineChart.options.scales.x.ticks.color = isDark ? '#aaaaaa' : '#777777';
-            myLineChart.options.scales.y.ticks.color = isDark ? '#aaaaaa' : '#777777';
-            myLineChart.options.scales.x.grid.color = isDark ? '#333333' : '#eeeeee';
-            myLineChart.options.scales.y.grid.color = isDark ? '#333333' : '#eeeeee';
-            myLineChart.update();
-        } else {
-            myLineChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: dateLabels,
-                    datasets: [{
-                        label: '支出金額',
-                        data: expenseData,
-                        borderColor: '#ff7b89',
-                        backgroundColor: 'rgba(255, 123, 137, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4, 
-                        pointRadius: 2,
-                        pointBackgroundColor: '#ff7b89'
-                    }]
+        myLedgerChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dateLabels,
+                datasets: [{
+                    label: '支出金額',
+                    data: expenseData,
+                    borderColor: '#ff7b89',
+                    backgroundColor: 'rgba(255, 123, 137, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4, 
+                    pointRadius: 2,
+                    pointBackgroundColor: '#ff7b89'
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    datalabels: { display: false } 
                 },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false },
-                        datalabels: { display: false } 
+                scales: {
+                    x: { 
+                        grid: { color: isDark ? '#333333' : '#eeeeee', drawBorder: false },
+                        ticks: { color: isDark ? '#aaaaaa' : '#777777', maxTicksLimit: 7 } 
                     },
-                    scales: {
-                        x: { 
-                            grid: { color: isDark ? '#333333' : '#eeeeee', drawBorder: false },
-                            ticks: { color: isDark ? '#aaaaaa' : '#777777', maxTicksLimit: 7 } 
-                        },
-                        y: { 
-                            beginAtZero: true,
-                            grid: { color: isDark ? '#333333' : '#eeeeee', drawBorder: false },
-                            ticks: { color: isDark ? '#aaaaaa' : '#777777', maxTicksLimit: 5 }
-                        }
+                    y: { 
+                        beginAtZero: true,
+                        grid: { color: isDark ? '#333333' : '#eeeeee', drawBorder: false },
+                        ticks: { color: isDark ? '#aaaaaa' : '#777777', maxTicksLimit: 5 }
                     }
                 }
-            });
-        }
+            }
+        });
+        return null;
+    }
+
+    // 打開類別明細視窗
+    function openCategoryDetailModal(catName) {
+        const rangeInfo = getLedgerRangeInfo();
+        const catTxs = db.transactions
+            .filter(tx => tx.type === 'expense' && (tx.category || '其他') === catName && tx.timestamp >= rangeInfo.startMs && tx.timestamp <= rangeInfo.endMs)
+            .sort((a, b) => b.timestamp - a.timestamp);
+
+        const total = catTxs.reduce((sum, t) => sum + t.amount, 0);
+        document.getElementById('cat-detail-title').innerText = `${catName} 支出明細`;
+        document.getElementById('cat-detail-range').innerText = rangeInfo.rangeTitle;
+        document.getElementById('cat-detail-total').innerText = `$ -${total.toLocaleString()}`;
+
+        const list = document.getElementById('cat-detail-list');
+        list.innerHTML = catTxs.length === 0
+            ? '<div style="text-align:center; padding: 20px; color: var(--text-light); font-size: 14px;">查無記錄</div>'
+            : '';
+        catTxs.forEach(tx => list.insertAdjacentHTML('beforeend', generateTxHTML(tx, false)));
+
+        const modal = document.getElementById('category-detail-modal');
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('show'), 10);
+        trackModal(true);
+    }
+
+    function closeCategoryDetailModal() {
+        const modal = document.getElementById('category-detail-modal');
+        if (!modal.classList.contains('show')) return;
+        modal.classList.remove('show');
+        setTimeout(() => modal.style.display = 'none', 300);
+        trackModal(false);
     }
 
     function updateBudgetBar() {
@@ -1797,14 +2073,16 @@
         return { bal, balTwd, filteredTx };
     }
 
-    function generateTxHTML(tx) {
+    // hideDate = true 時不顯示 MM/DD（用於首頁當日歷史記錄）
+    function generateTxHTML(tx, hideDate = false) {
         let amountText = ''; let metaText = '';
         if (tx.type === 'expense') { amountText = `- ${tx.amount}`; metaText = `從 ${accNames[tx.singleAcc]} 扣款`; } 
         else if (tx.type === 'income') { amountText = `+ ${tx.amount}`; metaText = `存入 ${accNames[tx.singleAcc]}`; } 
         else if (tx.type === 'transfer') { amountText = `${tx.amount}`; metaText = `${accNames[tx.fromAcc]} -> ${accNames[tx.toAcc]}`; }
         
         const d = new Date(tx.timestamp);
-        const dateStr = `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        const dateStr = hideDate ? timeStr : `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${timeStr}`;
         const catTag = (tx.type !== 'transfer' && tx.category) ? `${tx.category} | ` : '';
         const titleText = tx.note || tx.category || (tx.type === 'transfer' ? '轉帳' : '未分類');
         const iconSvg = getCategorySvg(tx.category, tx.type);
@@ -1890,7 +2168,7 @@
 
         document.getElementById('acc-easy-val').innerText = bal.easycard.toLocaleString();
 
-        // 首頁當日歷史記錄 + 永遠保留頂部加總卡片（$ 與數字間有空格）
+        // 首頁當日歷史記錄（不顯示日期，只顯示時間）
         let homeTx = db.transactions.filter(tx => tx.type !== 'adjust' && tx.timestamp >= startOfDayMs && tx.timestamp <= endOfDayMs);
         homeTx = applyFilterAndSort(homeTx, 'home-filter', 'home-sort');
         const homeContainer = document.getElementById('tx-container');
@@ -1917,32 +2195,15 @@
         if (homeTx.length === 0) {
             homeContainer.insertAdjacentHTML('beforeend', '<div style="text-align:center; padding: 20px; color: var(--text-light); font-size: 14px;">當日無交易紀錄</div>');
         } else {
-            homeTx.forEach(tx => homeContainer.insertAdjacentHTML('beforeend', generateTxHTML(tx)));
+            homeTx.forEach(tx => homeContainer.insertAdjacentHTML('beforeend', generateTxHTML(tx, true)));
         }
 
-        let startDateMs, endDateMs;
-        const y = viewingDate.getFullYear();
-        const m = viewingDate.getMonth();
-        
-        endDateMs = new Date(viewingDate).setHours(23, 59, 59, 999);
-        if (ledgerRangeDays === 365) {
-            startDateMs = new Date(y, 0, 1).getTime();
-            endDateMs = new Date(y, 11, 31, 23, 59, 59, 999).getTime();
-            document.getElementById('ledger-income-label').innerText = '本年總收入';
-            document.getElementById('ledger-expense-label').innerText = '本年總支出';
-        } else if (ledgerRangeDays === 30) {
-            startDateMs = new Date(y, m, 1).getTime();
-            endDateMs = new Date(y, m + 1, 0, 23, 59, 59, 999).getTime();
-            document.getElementById('ledger-income-label').innerText = '本月總收入';
-            document.getElementById('ledger-expense-label').innerText = '本月總支出';
-        } else {
-            startDateMs = new Date(viewingDate).setDate(viewingDate.getDate() - ledgerRangeDays + 1);
-            startDateMs = new Date(startDateMs).setHours(0, 0, 0, 0);
-            document.getElementById('ledger-income-label').innerText = `近${ledgerRangeDays}天總收入`;
-            document.getElementById('ledger-expense-label').innerText = `近${ledgerRangeDays}天總支出`;
-        }
+        // --- 查帳頁渲染 ---
+        const rangeInfo = getLedgerRangeInfo();
+        document.getElementById('ledger-income-label').innerText = `${rangeInfo.labelPrefix}總收入`;
+        document.getElementById('ledger-expense-label').innerText = `${rangeInfo.labelPrefix}總支出`;
 
-        let rangeTx = db.transactions.filter(tx => tx.type !== 'adjust' && tx.timestamp >= startDateMs && tx.timestamp <= endDateMs);
+        let rangeTx = db.transactions.filter(tx => tx.type !== 'adjust' && tx.timestamp >= rangeInfo.startMs && tx.timestamp <= rangeInfo.endMs);
         
         let totalIncome = 0; let totalExpense = 0;
         rangeTx.forEach(tx => {
@@ -1952,14 +2213,82 @@
         document.getElementById('ledger-month-income').innerText = `+ ${totalIncome.toLocaleString()}`;
         document.getElementById('ledger-month-expense').innerText = `- ${totalExpense.toLocaleString()}`;
         
-        updateLineChart(db.transactions); 
+        const pieResult = updateLedgerChart(rangeTx, rangeInfo);
 
-        const searchKw = document.getElementById('ledger-search').value;
-        let displayTx = applyFilterAndSort(rangeTx, 'ledger-filter', 'ledger-sort', searchKw);
-        
         const ledgerContainer = document.getElementById('ledger-tx-container');
-        ledgerContainer.innerHTML = displayTx.length === 0 ? '<div style="text-align:center; padding: 20px; color: var(--text-light); font-size: 14px;">查無交易紀錄</div>' : '';
-        displayTx.forEach(tx => ledgerContainer.insertAdjacentHTML('beforeend', generateTxHTML(tx)));
+        const searchInput = document.getElementById('ledger-search');
+        const filterControlsRow = document.getElementById('ledger-filter-controls-row');
+        const detailTitle = document.getElementById('ledger-detail-title');
+
+        if (ledgerChartType === 'pie') {
+            // 類別比例模式：顯示每個類別的花費，點擊可彈出明細
+            detailTitle.innerText = '類別支出明細';
+            searchInput.classList.add('hidden');
+            filterControlsRow.classList.add('hidden');
+
+            const { sortedCats, totalExp } = pieResult;
+            ledgerContainer.innerHTML = `
+                <div class="daily-summary-card">
+                    <span class="daily-summary-date">${rangeInfo.rangeTitle} 總支出</span>
+                    <span class="daily-summary-total ${totalExp > 0 ? 'neg' : 'zero'}">$ ${totalExp > 0 ? '-' : ''}${totalExp.toLocaleString()}</span>
+                </div>
+            `;
+
+            if (sortedCats.length === 0) {
+                ledgerContainer.insertAdjacentHTML('beforeend', '<div style="text-align:center; padding: 20px; color: var(--text-light); font-size: 14px;">該區間無支出紀錄</div>');
+            } else {
+                sortedCats.forEach(([catName, amount]) => {
+                    const catObj = getCategoryObj(catName, 'expense');
+                    const pct = totalExp > 0 ? ((amount / totalExp) * 100).toFixed(1) : '0.0';
+                    ledgerContainer.insertAdjacentHTML('beforeend', `
+                        <div class="cat-summary-card" onclick="openCategoryDetailModal('${catName}')">
+                            <div class="cat-summary-left">
+                                <div class="cat-summary-icon" style="background:${catObj.color}">
+                                    <svg viewBox="0 0 24 24">${catObj.svg}</svg>
+                                </div>
+                                <div>
+                                    <div class="cat-summary-name">${catName}</div>
+                                    <div class="cat-summary-pct">${pct}%</div>
+                                </div>
+                            </div>
+                            <div class="cat-summary-right">
+                                <span>$ -${amount.toLocaleString()}</span>
+                                <span class="cat-summary-arrow">❯</span>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+        } else {
+            // 消費趨勢折線圖模式：顯示該區間交易明細 + 頂部加總
+            detailTitle.innerText = '交易明細';
+            searchInput.classList.remove('hidden');
+            filterControlsRow.classList.remove('hidden');
+
+            const searchKw = searchInput.value;
+            let displayTx = applyFilterAndSort(rangeTx, 'ledger-filter', 'ledger-sort', searchKw);
+            
+            let ledgerNet = 0;
+            displayTx.forEach(tx => {
+                if (tx.type === 'expense') ledgerNet -= tx.amount;
+                else if (tx.type === 'income') ledgerNet += tx.amount;
+            });
+            const lClass = ledgerNet < 0 ? 'neg' : (ledgerNet > 0 ? 'pos' : 'zero');
+            const lSign = ledgerNet > 0 ? '+' : '';
+
+            ledgerContainer.innerHTML = `
+                <div class="daily-summary-card">
+                    <span class="daily-summary-date">${rangeInfo.rangeTitle}</span>
+                    <span class="daily-summary-total ${lClass}">$ ${lSign}${ledgerNet.toLocaleString()}</span>
+                </div>
+            `;
+
+            if (displayTx.length === 0) {
+                ledgerContainer.insertAdjacentHTML('beforeend', '<div style="text-align:center; padding: 20px; color: var(--text-light); font-size: 14px;">查無交易紀錄</div>');
+            } else {
+                displayTx.forEach(tx => ledgerContainer.insertAdjacentHTML('beforeend', generateTxHTML(tx, false)));
+            }
+        }
     }
 
     function setTxType(type) {
@@ -2114,6 +2443,7 @@
         trackModal(false);
     }
 
+    // 戶口修改記錄（顯示前後變動，沒改的維持原樣）
     function openAdjustHistoryModal() {
         const list = document.getElementById('adjust-history-list');
         list.innerHTML = '';
@@ -2135,7 +2465,17 @@
                 
                 let detailLines = g.txs.map(tx => {
                     if (isMyrAcc(tx.singleAcc) && tx.originalMyr !== undefined && tx.originalMyr !== null) {
-                        return `${accNames[tx.singleAcc]}：${tx.originalMyr.toLocaleString()} MYR`;
+                        const curr = Number(tx.originalMyr.toFixed(2));
+                        if (tx.prevOriginalMyr !== undefined && tx.prevOriginalMyr !== null) {
+                            const prev = Number(tx.prevOriginalMyr.toFixed(2));
+                            if (prev !== curr) {
+                                return `${accNames[tx.singleAcc]}：${prev.toLocaleString()} -> ${curr.toLocaleString()} MYR`;
+                            }
+                        }
+                        return `${accNames[tx.singleAcc]}：${curr.toLocaleString()} MYR`;
+                    }
+                    if (tx.prevAmount !== undefined && tx.prevAmount !== null && tx.prevAmount !== tx.amount) {
+                        return `${accNames[tx.singleAcc]}：${tx.prevAmount.toLocaleString()} -> ${tx.amount.toLocaleString()}`;
                     }
                     return `${accNames[tx.singleAcc]}：${tx.amount.toLocaleString()}`;
                 }).join('<br>');
@@ -2181,6 +2521,8 @@
         trackModal(false);
     }
     function saveInitialBalances() {
+        const { bal: prevBal } = calculateCurrentBalances(Date.now());
+
         const newPost = parseFloat(document.getElementById('init-post').value) || 0;
         const newCash = parseFloat(document.getElementById('init-cash').value) || 0;
         const newMaybankMyr = parseFloat(document.getElementById('init-maybank').value) || 0;
@@ -2191,11 +2533,11 @@
         const newSavingsTwd = Math.round(newSavingsMyr * myrToTwdRate);
 
         const ts = Date.now();
-        db.transactions.push({ id: ts, timestamp: ts, type: 'adjust', singleAcc: 'post', amount: newPost, note: '系統校正' });
-        db.transactions.push({ id: ts+1, timestamp: ts+1, type: 'adjust', singleAcc: 'cash', amount: newCash, note: '系統校正' });
-        db.transactions.push({ id: ts+2, timestamp: ts+2, type: 'adjust', singleAcc: 'maybank', amount: newMaybankTwd, originalMyr: newMaybankMyr, note: '系統校正' });
-        db.transactions.push({ id: ts+3, timestamp: ts+3, type: 'adjust', singleAcc: 'savings', amount: newSavingsTwd, originalMyr: newSavingsMyr, note: '系統校正' });
-        db.transactions.push({ id: ts+4, timestamp: ts+4, type: 'adjust', singleAcc: 'easycard', amount: newEasy, note: '系統校正' });
+        db.transactions.push({ id: ts, timestamp: ts, type: 'adjust', singleAcc: 'post', prevAmount: prevBal.post, amount: newPost, note: '系統校正' });
+        db.transactions.push({ id: ts+1, timestamp: ts+1, type: 'adjust', singleAcc: 'cash', prevAmount: prevBal.cash, amount: newCash, note: '系統校正' });
+        db.transactions.push({ id: ts+2, timestamp: ts+2, type: 'adjust', singleAcc: 'maybank', prevOriginalMyr: parseFloat(prevBal.maybank.toFixed(2)), amount: newMaybankTwd, originalMyr: newMaybankMyr, note: '系統校正' });
+        db.transactions.push({ id: ts+3, timestamp: ts+3, type: 'adjust', singleAcc: 'savings', prevOriginalMyr: parseFloat(prevBal.savings.toFixed(2)), amount: newSavingsTwd, originalMyr: newSavingsMyr, note: '系統校正' });
+        db.transactions.push({ id: ts+4, timestamp: ts+4, type: 'adjust', singleAcc: 'easycard', prevAmount: prevBal.easycard, amount: newEasy, note: '系統校正' });
         
         saveDB(); 
         closeBalanceModal(); 
