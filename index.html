@@ -1072,7 +1072,7 @@
         return { bal, balTwd, filteredTx };
     }
 
-    function generateTxHTML(tx, hideDate = false) {
+    function generateTxHTML(tx, hideDate = false, hideTime = false)  {
         let amountText = '', metaText = '';
         if (tx.type === 'expense') { amountText = `- ${tx.amount}`; metaText = `從 ${accNames[tx.singleAcc]} 扣款`; }
         else if (tx.type === 'income') { amountText = `+ ${tx.amount}`; metaText = `存入 ${accNames[tx.singleAcc]}`; }
