@@ -32,6 +32,8 @@
             --calendar-text: #333333;
             --calendar-selected: #7bcaf5;
             --calendar-today-border: #7bcaf5;
+            --calc-num-bg: #f4f7fa;
+            --calc-num-border: #dce4ec;
         }
 
         body.dark-mode {
@@ -48,6 +50,8 @@
             --calendar-text: #f0f0f0;
             --calendar-selected: #5b9bd5;
             --calendar-today-border: #5b9bd5;
+            --calc-num-bg: #26323e;
+            --calc-num-border: #3d4d5c;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, '微軟正黑體', sans-serif; user-select: none; }
@@ -266,7 +270,7 @@
         .nav-add:active { transform: scale(0.95); }
         body.dark-mode .nav-add { box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: none; }
 
-        /* 彈窗遮罩設定：完全延伸至頂端覆蓋狀態列 */
+        /* 彈窗遮罩設定 */
         .modal, .calendar-modal, .custom-prompt { display: none !important; }
         .modal.show, .calendar-modal.show, .custom-prompt.show { display: flex !important; }
 
@@ -298,25 +302,82 @@
         }
         .modal.show .modal-content { transform: translateY(0); }
         
-        .modal-body { max-height: calc(85dvh - 80px); overflow-y: auto; padding-right: 5px; }
+        .modal-body { max-height: calc(85dvh - 80px); overflow-y: auto; padding-right: 2px; }
 
         .modal-decor { position: absolute; top: -65px; left: 50%; transform: translateX(-50%); width: 190px; height: auto; pointer-events: none; z-index: 1001; }
 
-        .form-group { margin-bottom: 15px; position: relative;}
+        .form-group { margin-bottom: 14px; position: relative;}
         .form-group label { display: block; font-size: 13px; margin-bottom: 8px; color: var(--text-light); font-weight: bold;}
         
-        /* 動態提示匯率文字的樣式 */
         #tx-amount-label { transition: color 0.3s ease; }
 
         .form-group input { width: 100%; padding: 14px; border: 1.5px solid var(--border-color); background: transparent; color: var(--text-main); border-radius: 14px; font-size: 16px; outline: none; transition: border-color 0.2s; -webkit-appearance: none; appearance: none; }
-        .form-group input:focus { border-color: var(--accent); }
-        body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+        .form-group input:focus, .form-group input.calc-focused { border-color: var(--accent); }
 
-        /* 類別選擇網格 (5x2) */
+        /* 新增記錄自訂日期列 */
+        .modal-date-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            padding: 8px 12px;
+            background: transparent;
+        }
+        .modal-date-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+        .modal-date-btn:active { background: rgba(0,0,0,0.06); }
+        .modal-date-display {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 4px 10px;
+            letter-spacing: 0.5px;
+        }
+
+        /* 付款帳戶格子 (5 欄) */
+        .acc-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        .acc-grid-item {
+            padding: 11px 4px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-color);
+            background: transparent;
+            color: var(--text-light);
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .acc-grid-item.active {
+            border-color: var(--accent);
+            background: rgba(123, 202, 245, 0.16);
+            color: var(--accent);
+            transform: scale(1.03);
+        }
+
+        /* 類別選擇網格 */
         .category-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 8px;
+        }
+        .category-grid.cols-4 {
+            grid-template-columns: repeat(4, 1fr);
         }
         .cat-item {
             display: flex;
@@ -353,11 +414,67 @@
             transform: scale(1.03);
         }
 
-        .tx-type-group { display: flex; gap: 10px; margin: 20px 0 10px 0; background: rgba(0,0,0,0.03); padding: 5px; border-radius: 16px; }
-        .type-btn { flex: 1; padding: 12px; background: transparent; border: none; border-radius: 12px; color: var(--text-light); cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 15px;}
+        /* 自訂計算機樣式 */
+        .calc-pad {
+            display: none;
+            grid-template-columns: repeat(5, 1fr);
+            grid-auto-rows: 48px;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 18px;
+            background: rgba(0, 0, 0, 0.04);
+        }
+        body.dark-mode .calc-pad {
+            background: rgba(0, 0, 0, 0.25);
+        }
+        .calc-pad.show {
+            display: grid;
+        }
+        .calc-btn {
+            border-radius: 999px;
+            border: 1.5px solid var(--calc-num-border);
+            background: var(--calc-num-bg);
+            color: var(--text-main);
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.1s ease, opacity 0.1s ease;
+        }
+        .calc-btn:active {
+            transform: scale(0.93);
+            opacity: 0.85;
+        }
+        .calc-btn.op {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #ffffff;
+            font-size: 19px;
+        }
+        .calc-btn.op-text {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #ffffff;
+            font-size: 15px;
+        }
+        .calc-btn.ok {
+            grid-column: 5;
+            grid-row: 3 / span 2;
+            background: var(--expense);
+            border-color: var(--expense);
+            color: #ffffff;
+            font-size: 17px;
+            border-radius: 26px;
+        }
+
+        .tx-type-group { display: flex; gap: 10px; margin: 0 0 14px 0; background: rgba(0,0,0,0.03); padding: 5px; border-radius: 16px; }
+        .type-btn { flex: 1; padding: 11px; background: transparent; border: none; border-radius: 12px; color: var(--text-light); cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 15px;}
         .type-btn.active { background: var(--card-bg); color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 
-        .action-buttons { display: flex; gap: 12px; margin-top: 20px; }
+        .action-buttons { display: flex; gap: 12px; margin-top: 18px; }
         .btn-submit { flex: 4; padding: 16px; background-color: var(--accent); color: white; border: none; border-radius: 16px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(123,202,245,0.4); transition: transform 0.1s;}
         .btn-submit:active { transform: scale(0.98); }
         .btn-cancel { flex: 1; padding: 16px; background: var(--border-color); color: var(--text-main); border: none; border-radius: 16px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background 0.2s;}
@@ -456,7 +573,7 @@
         </div>
         <div class="date-selector">
             <button class="date-btn" onclick="changeDate(-1)">❮</button>
-            <div class="date-display" id="date-display" onclick="openCalendar()">2026/11/18</div>
+            <div class="date-display" id="date-display" onclick="openCalendar('main')">2026/11/18</div>
             <button class="date-btn" onclick="changeDate(1)">❯</button>
         </div>
     </header>
@@ -594,13 +711,11 @@
                 <div class="account-card-value" style="color: #ffb6c1;" id="acc-cash-val">0</div>
             </div>
             
-            <!-- 馬銀行區塊 -->
             <div class="account-card">
                 <div class="account-card-name">馬銀行 <span id="maybank-currency-label" style="font-size: 11px; font-weight: normal;">(TWD)</span></div>
                 <div class="account-card-value" style="color: #f39c12; cursor: pointer;" id="acc-maybank-val" onclick="toggleMyrCurrency()">0</div>
             </div>
             
-            <!-- 儲蓄區塊 -->
             <div class="account-card">
                 <div class="account-card-name">儲蓄 <span id="savings-currency-label" style="font-size: 11px; font-weight: normal;">(TWD)</span></div>
                 <div class="account-card-value" style="color: #2ecc71; cursor: pointer;" id="acc-savings-val" onclick="toggleMyrCurrency()">0</div>
@@ -667,7 +782,7 @@
 
 <!-- 新增/編輯交易視窗 -->
 <div class="modal" id="add-modal" onclick="closeModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-content" onclick="handleModalContentClick(event)">
         <svg class="modal-decor" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" style="top: -65px; width: 190px;">
             <path d="M 50,150 C 30,150 20,130 30,110 C 10,100 10,60 50,50 C 60,30 90,20 120,30 C 140,0 200,0 240,20 C 270,10 320,20 330,50 C 360,50 390,70 380,100 C 390,120 370,150 350,150 Z" fill="#ffffff" stroke="#aaddf9" stroke-width="4" stroke-linejoin="round"/>
             <path d="M 280,40 C 280,20 320,20 320,40 C 320,60 300,70 280,60" fill="none" stroke="#aaddf9" stroke-width="4" stroke-linecap="round"/>
@@ -681,26 +796,30 @@
         </svg>
 
         <div class="modal-body">
-            <h3 id="modal-title" style="text-align: center; margin-bottom: 20px; font-weight: bold; color: var(--text-main); display: none;">編輯交易</h3>
+            <h3 id="modal-title" style="text-align: center; margin-bottom: 16px; font-weight: bold; color: var(--text-main); display: none;">編輯交易</h3>
             
+            <!-- 1. 日期（自訂左右箭頭與日曆 UI） -->
             <div class="form-group">
                 <label>日期</label>
-                <input type="date" id="tx-date">
+                <div class="modal-date-bar">
+                    <button type="button" class="modal-date-btn" onclick="changeTxDate(-1)">❮</button>
+                    <div class="modal-date-display" id="tx-date-display" onclick="openCalendar('tx')">2026/11/23 星期一</div>
+                    <button type="button" class="modal-date-btn" onclick="changeTxDate(1)">❯</button>
+                </div>
             </div>
 
+            <!-- 2. 支出 / 轉帳 / 收入 -->
+            <div class="tx-type-group">
+                <button class="type-btn active" id="tab-expense" onclick="setTxType('expense')">支出</button>
+                <button class="type-btn" id="tab-transfer" onclick="setTxType('transfer')">轉帳</button>
+                <button class="type-btn" id="tab-income" onclick="setTxType('income')">收入</button>
+            </div>
+
+            <!-- 3. 付款/收款帳戶（格子選擇） -->
             <div class="form-group" id="group-single-acc">
                 <label id="label-single-acc">付款帳戶</label>
-                <div class="custom-select-wrapper" id="tx-single-acc-wrapper">
-                    <div class="custom-select" onclick="toggleSelect('tx-single-acc-wrapper')">現金</div>
-                    <div class="custom-options">
-                        <div class="custom-option" onclick="selectOption('tx-single-acc-wrapper', 'post', '郵局')">郵局</div>
-                        <div class="custom-option selected" onclick="selectOption('tx-single-acc-wrapper', 'cash', '現金')">現金</div>
-                        <div class="custom-option" onclick="selectOption('tx-single-acc-wrapper', 'maybank', '馬銀行')">馬銀行</div>
-                        <div class="custom-option" onclick="selectOption('tx-single-acc-wrapper', 'savings', '儲蓄')">儲蓄</div>
-                        <div class="custom-option" onclick="selectOption('tx-single-acc-wrapper', 'easycard', '悠游卡')">悠游卡</div>
-                    </div>
-                    <input type="hidden" id="tx-single-acc" value="cash">
-                </div>
+                <div class="acc-grid" id="tx-single-acc-grid"></div>
+                <input type="hidden" id="tx-single-acc" value="cash">
             </div>
 
             <div class="form-group hidden" id="group-transfer-acc">
@@ -736,25 +855,46 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label id="tx-amount-label" style="transition: color 0.3s ease;">金額 (TWD)</label>
-                <input type="number" id="tx-amount" placeholder="輸入金額" inputmode="decimal">
+            <!-- 4. 金額（點擊展開計算機） -->
+            <div class="form-group" id="group-amount">
+                <label id="tx-amount-label">金額 (TWD)</label>
+                <input type="text" id="tx-amount" placeholder="輸入金額" readonly onclick="openCalc()">
+                <div class="calc-pad" id="calc-pad">
+                    <button type="button" class="calc-btn" onclick="calcPress('7')">7</button>
+                    <button type="button" class="calc-btn" onclick="calcPress('8')">8</button>
+                    <button type="button" class="calc-btn" onclick="calcPress('9')">9</button>
+                    <button type="button" class="calc-btn op" onclick="calcPress('÷')">÷</button>
+                    <button type="button" class="calc-btn op-text" onclick="calcClear()">AC</button>
+
+                    <button type="button" class="calc-btn" onclick="calcPress('4')">4</button>
+                    <button type="button" class="calc-btn" onclick="calcPress('5')">5</button>
+                    <button type="button" class="calc-btn" onclick="calcPress('6')">6</button>
+                    <button type="button" class="calc-btn op" onclick="calcPress('×')">×</button>
+                    <button type="button" class="calc-btn op" onclick="calcBackspace()">←</button>
+
+                    <button type="button" class="calc-btn" onclick="calcPress('1')">1</button>
+                    <button type="button" class="calc-btn" onclick="calcPress('2')">2</button>
+                    <button type="button" class="calc-btn" onclick="calcPress('3')">3</button>
+                    <button type="button" class="calc-btn op" onclick="calcPress('+')">+</button>
+                    <button type="button" class="calc-btn ok" onclick="calcOk()">OK</button>
+
+                    <button type="button" class="calc-btn" onclick="calcPress('00')">00</button>
+                    <button type="button" class="calc-btn" onclick="calcPress('0')">0</button>
+                    <button type="button" class="calc-btn" onclick="calcPress('.')">.</button>
+                    <button type="button" class="calc-btn op" onclick="calcPress('-')">-</button>
+                </div>
             </div>
 
+            <!-- 5. 類別 -->
             <div class="form-group" id="group-category">
                 <label>類別</label>
                 <div class="category-grid" id="category-grid"></div>
             </div>
             
+            <!-- 6. 備註 -->
             <div class="form-group">
                 <label>備註</label>
-                <input type="text" id="tx-note" placeholder="輸入項目（選填，未填則顯示類別）">
-            </div>
-
-            <div class="tx-type-group">
-                <button class="type-btn active" id="tab-expense" onclick="setTxType('expense')">支出</button>
-                <button class="type-btn" id="tab-transfer" onclick="setTxType('transfer')">轉帳</button>
-                <button class="type-btn" id="tab-income" onclick="setTxType('income')">收入</button>
+                <input type="text" id="tx-note" placeholder="輸入項目（選填，未填則顯示類別）" onfocus="closeCalc()">
             </div>
             
             <div class="action-buttons">
@@ -844,12 +984,14 @@
 <script>
     Chart.register(ChartDataLabels);
 
+    const accKeys = ['post', 'cash', 'maybank', 'savings', 'easycard'];
     const accNames = { post: '郵局', cash: '現金', maybank: '馬銀行', savings: '儲蓄', easycard: '悠游卡' };
     const accColors = ['#7bcaf5', '#ffb6c1', '#f39c12', '#2ecc71', '#b8c0ff'];
     const isMyrAcc = (acc) => acc === 'maybank' || acc === 'savings';
+    const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
 
-    // 10 種自訂類別與對應 SVG 圖示
-    const categories = [
+    // 支出類別 (10)
+    const expenseCategories = [
         { name: '早午晚餐', svg: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>' },
         { name: '自煮', svg: '<path d="M2 12h20"/><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="m4 8 16-4"/><path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8"/>' },
         { name: '零食', svg: '<path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/>' },
@@ -860,6 +1002,14 @@
         { name: '行政費', svg: '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>' },
         { name: '其他', svg: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>' },
         { name: '旅行', svg: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>' }
+    ];
+
+    // 收入類別 (4)
+    const incomeCategories = [
+        { name: '薪水', svg: '<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>' },
+        { name: '交易', svg: '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>' },
+        { name: '生活費', svg: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>' },
+        { name: '其他', svg: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>' }
     ];
     const transferIconSvg = '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>';
 
@@ -878,7 +1028,9 @@
     let showMyrCurrency = false;
     
     let viewingDate = new Date();
+    let txModalDate = new Date();
     let calDate = new Date(); 
+    let calendarTarget = 'main'; // 'main' 或 'tx'
     
     let db = JSON.parse(localStorage.getItem('pure_money_db')) || { 
         transactions: [],
@@ -890,7 +1042,7 @@
         localStorage.setItem('pure_money_db', JSON.stringify(db)); 
     }
 
-    function toDateInputValue(dateObj) {
+    function toDateKey(dateObj) {
         const y = dateObj.getFullYear();
         const m = String(dateObj.getMonth() + 1).padStart(2, '0');
         const d = String(dateObj.getDate()).padStart(2, '0');
@@ -899,23 +1051,135 @@
 
     function getCategorySvg(catName, type) {
         if (type === 'transfer') return transferIconSvg;
-        const found = categories.find(c => c.name === catName);
-        return found ? found.svg : categories[8].svg;
+        const list = type === 'income' ? incomeCategories : expenseCategories;
+        const found = list.find(c => c.name === catName) || expenseCategories.find(c => c.name === catName) || incomeCategories.find(c => c.name === catName);
+        return found ? found.svg : expenseCategories[8].svg;
     }
 
+    // 渲染帳戶格子
+    function renderAccountGrid() {
+        const currentAcc = document.getElementById('tx-single-acc').value || 'cash';
+        const grid = document.getElementById('tx-single-acc-grid');
+        grid.innerHTML = '';
+        accKeys.forEach(key => {
+            const div = document.createElement('div');
+            div.className = 'acc-grid-item' + (currentAcc === key ? ' active' : '');
+            div.innerText = accNames[key];
+            div.onclick = () => {
+                document.getElementById('tx-single-acc').value = key;
+                renderAccountGrid();
+                updateCurrencyLabel();
+                closeCalc();
+            };
+            grid.appendChild(div);
+        });
+    }
+
+    // 渲染類別格子
     function renderCategoryGrid() {
         const grid = document.getElementById('category-grid');
+        const list = currentType === 'income' ? incomeCategories : expenseCategories;
+        if (!list.some(c => c.name === selectedCategory)) {
+            selectedCategory = list[0].name;
+        }
+        grid.className = 'category-grid' + (currentType === 'income' ? ' cols-4' : '');
         grid.innerHTML = '';
-        categories.forEach(cat => {
+        list.forEach(cat => {
             const div = document.createElement('div');
             div.className = 'cat-item' + (selectedCategory === cat.name ? ' active' : '');
             div.innerHTML = `<svg viewBox="0 0 24 24">${cat.svg}</svg><span>${cat.name}</span>`;
             div.onclick = () => {
                 selectedCategory = cat.name;
                 renderCategoryGrid();
+                closeCalc();
             };
             grid.appendChild(div);
         });
+    }
+
+    // --- 計算機邏輯 ---
+    function openCalc() {
+        document.getElementById('calc-pad').classList.add('show');
+        document.getElementById('tx-amount').classList.add('calc-focused');
+    }
+
+    function evaluateCalcExpr(raw) {
+        if (!raw) return '';
+        let expr = String(raw).replace(/×/g, '*').replace(/÷/g, '/').replace(/[^0-9+\-*/.]/g, '');
+        expr = expr.replace(/[+\-*/.]+$/, '');
+        if (!expr) return '';
+        try {
+            const res = Function('"use strict"; return (' + expr + ')')();
+            if (typeof res === 'number' && isFinite(res)) {
+                return String(Math.round(res * 100) / 100);
+            }
+        } catch (e) {}
+        return raw;
+    }
+
+    function closeCalc() {
+        const pad = document.getElementById('calc-pad');
+        if (!pad.classList.contains('show')) return;
+        const input = document.getElementById('tx-amount');
+        if (input.value) {
+            input.value = evaluateCalcExpr(input.value);
+        }
+        pad.classList.remove('show');
+        input.classList.remove('calc-focused');
+    }
+
+    function calcPress(val) {
+        const input = document.getElementById('tx-amount');
+        let cur = input.value || '';
+        const isOp = ['+', '-', '×', '÷'].includes(val);
+        if (isOp) {
+            if (!cur) return;
+            if (['+', '-', '×', '÷'].includes(cur.slice(-1))) {
+                cur = cur.slice(0, -1);
+            }
+            input.value = cur + val;
+            return;
+        }
+        if (val === '.') {
+            const parts = cur.split(/[+\-×÷]/);
+            if (parts[parts.length - 1].includes('.')) return;
+            if (!parts[parts.length - 1]) cur += '0';
+        }
+        if ((val === '0' || val === '00') && cur === '0') return;
+        input.value = cur + val;
+    }
+
+    function calcClear() {
+        document.getElementById('tx-amount').value = '';
+    }
+
+    function calcBackspace() {
+        const input = document.getElementById('tx-amount');
+        input.value = input.value.slice(0, -1);
+    }
+
+    function calcOk() {
+        closeCalc();
+    }
+
+    function handleModalContentClick(e) {
+        e.stopPropagation();
+        if (!e.target.closest('#group-amount')) {
+            closeCalc();
+        }
+    }
+
+    // --- 彈窗內日期控制 ---
+    function formatTxDate() {
+        const y = txModalDate.getFullYear();
+        const m = String(txModalDate.getMonth() + 1).padStart(2, '0');
+        const d = String(txModalDate.getDate()).padStart(2, '0');
+        document.getElementById('tx-date-display').innerText = `${y}/${m}/${d} ${weekDays[txModalDate.getDay()]}`;
+    }
+
+    function changeTxDate(offset) {
+        txModalDate.setDate(txModalDate.getDate() + offset);
+        formatTxDate();
     }
     
     // 抓取最新 MYR 到 TWD 的匯率
@@ -1119,17 +1383,20 @@
         editingTxId = id;
         document.getElementById('modal-title').style.display = 'block';
         document.getElementById('btn-save-tx').innerText = '儲存修改';
-        document.getElementById('tx-date').value = toDateInputValue(new Date(tx.timestamp));
         
-        selectedCategory = tx.category || '其他';
-        renderCategoryGrid();
+        txModalDate = new Date(tx.timestamp);
+        formatTxDate();
+        
+        selectedCategory = tx.category || (tx.type === 'income' ? '薪水' : '其他');
         setTxType(tx.type); 
         
         if(tx.type === 'transfer') {
             selectOption('tx-from-acc-wrapper', tx.fromAcc, accNames[tx.fromAcc]);
             selectOption('tx-to-acc-wrapper', tx.toAcc, accNames[tx.toAcc]);
         } else {
-            selectOption('tx-single-acc-wrapper', tx.singleAcc, accNames[tx.singleAcc]);
+            document.getElementById('tx-single-acc').value = tx.singleAcc;
+            renderAccountGrid();
+            updateCurrencyLabel();
         }
         
         let isMYR = false;
@@ -1143,6 +1410,7 @@
         }
 
         document.getElementById('tx-note').value = tx.note || '';
+        closeCalc();
         
         const modal = document.getElementById('add-modal');
         modal.style.display = 'flex';
@@ -1198,8 +1466,9 @@
         renderApp();
     }
 
-    function openCalendar() {
-        calDate = new Date(viewingDate);
+    function openCalendar(target = 'main') {
+        calendarTarget = target;
+        calDate = new Date(target === 'tx' ? txModalDate : viewingDate);
         renderCalendar();
         document.getElementById('calendar-modal').classList.add('show');
         trackModal(true);
@@ -1222,22 +1491,29 @@
         const grid = document.getElementById('cal-days');
         grid.innerHTML = '';
         const today = new Date();
+        const activeRefDate = calendarTarget === 'tx' ? txModalDate : viewingDate;
         
         for(let i=0; i<firstDay; i++) { grid.innerHTML += `<div class="cal-day empty"></div>`; }
         for(let i=1; i<=daysInMonth; i++) {
             const cellDate = new Date(y, m, i);
             let classes = "cal-day";
             if(cellDate.toDateString() === today.toDateString()) classes += " today";
-            if(cellDate.toDateString() === viewingDate.toDateString()) classes += " selected";
+            if(cellDate.toDateString() === activeRefDate.toDateString()) classes += " selected";
             grid.innerHTML += `<div class="${classes}" onclick="selectDate(${y}, ${m}, ${i})">${i}</div>`;
         }
     }
     
     function selectDate(y, m, d) {
-        viewingDate = new Date(y, m, d);
-        formatViewingDate();
-        closeCalendar();
-        renderApp();
+        if (calendarTarget === 'tx') {
+            txModalDate = new Date(y, m, d);
+            formatTxDate();
+            closeCalendar();
+        } else {
+            viewingDate = new Date(y, m, d);
+            formatViewingDate();
+            closeCalendar();
+            renderApp();
+        }
     }
 
     function updateChart(balTwdObj) {
@@ -1614,33 +1890,33 @@
 
         document.getElementById('acc-easy-val').innerText = bal.easycard.toLocaleString();
 
-        // 首頁當日歷史記錄 + 頂部加總卡片
+        // 首頁當日歷史記錄 + 永遠保留頂部加總卡片（$ 與數字間有空格）
         let homeTx = db.transactions.filter(tx => tx.type !== 'adjust' && tx.timestamp >= startOfDayMs && tx.timestamp <= endOfDayMs);
         homeTx = applyFilterAndSort(homeTx, 'home-filter', 'home-sort');
         const homeContainer = document.getElementById('tx-container');
         
+        let dailyNet = 0;
+        homeTx.forEach(tx => {
+            if (tx.type === 'expense') dailyNet -= tx.amount;
+            else if (tx.type === 'income') dailyNet += tx.amount;
+        });
+        const yStr = viewingDate.getFullYear();
+        const mStr = String(viewingDate.getMonth() + 1).padStart(2, '0');
+        const dStr = String(viewingDate.getDate()).padStart(2, '0');
+        const dateHeaderStr = `${yStr}/${mStr}/${dStr} ${weekDays[viewingDate.getDay()]}`;
+        const totalClass = dailyNet < 0 ? 'neg' : (dailyNet > 0 ? 'pos' : 'zero');
+        const totalSign = dailyNet > 0 ? '+' : '';
+        
+        homeContainer.innerHTML = `
+            <div class="daily-summary-card">
+                <span class="daily-summary-date">${dateHeaderStr}</span>
+                <span class="daily-summary-total ${totalClass}">$ ${totalSign}${dailyNet.toLocaleString()}</span>
+            </div>
+        `;
+
         if (homeTx.length === 0) {
-            homeContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-light); font-size: 14px;">當日無交易紀錄</div>';
+            homeContainer.insertAdjacentHTML('beforeend', '<div style="text-align:center; padding: 20px; color: var(--text-light); font-size: 14px;">當日無交易紀錄</div>');
         } else {
-            let dailyNet = 0;
-            homeTx.forEach(tx => {
-                if (tx.type === 'expense') dailyNet -= tx.amount;
-                else if (tx.type === 'income') dailyNet += tx.amount;
-            });
-            const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-            const yStr = viewingDate.getFullYear();
-            const mStr = String(viewingDate.getMonth() + 1).padStart(2, '0');
-            const dStr = String(viewingDate.getDate()).padStart(2, '0');
-            const dateHeaderStr = `${yStr}/${mStr}/${dStr} ${weekDays[viewingDate.getDay()]}`;
-            const totalClass = dailyNet < 0 ? 'neg' : (dailyNet > 0 ? 'pos' : 'zero');
-            const totalSign = dailyNet > 0 ? '+' : '';
-            
-            homeContainer.innerHTML = `
-                <div class="daily-summary-card">
-                    <span class="daily-summary-date">${dateHeaderStr}</span>
-                    <span class="daily-summary-total ${totalClass}">$${totalSign}${dailyNet.toLocaleString()}</span>
-                </div>
-            `;
             homeTx.forEach(tx => homeContainer.insertAdjacentHTML('beforeend', generateTxHTML(tx)));
         }
 
@@ -1704,15 +1980,17 @@
             transG.classList.add('hidden');
             catG.classList.remove('hidden');
             sLabel.innerText = type === 'expense' ? '付款帳戶' : '收款帳戶';
+            renderCategoryGrid();
         }
         
         updateCurrencyLabel();
     }
 
     function saveTransaction() {
-        const inputAmount = parseFloat(document.getElementById('tx-amount').value);
+        closeCalc();
+        const rawAmount = evaluateCalcExpr(document.getElementById('tx-amount').value);
+        const inputAmount = parseFloat(rawAmount);
         const noteInput = document.getElementById('tx-note').value.trim();
-        const dateVal = document.getElementById('tx-date').value;
         
         if (!inputAmount || inputAmount <= 0) { showAlert('請填寫正確的金額喔！'); return; }
         
@@ -1726,14 +2004,15 @@
             return; 
         }
 
-        // 依照選擇的日期產生時間戳
-        let txTimestamp = Date.now();
-        if (dateVal) {
-            const [y, m, d] = dateVal.split('-').map(Number);
-            const now = new Date();
-            const chosenDate = new Date(y, m - 1, d, now.getHours(), now.getMinutes(), now.getSeconds());
-            txTimestamp = chosenDate.getTime();
-        }
+        const now = new Date();
+        const txTimestamp = new Date(
+            txModalDate.getFullYear(),
+            txModalDate.getMonth(),
+            txModalDate.getDate(),
+            now.getHours(),
+            now.getMinutes(),
+            now.getSeconds()
+        ).getTime();
 
         let originalMyrVal = null;
         let amountTWD = inputAmount;
@@ -1756,8 +2035,9 @@
         if (editingTxId) {
             const idx = db.transactions.findIndex(t => t.id === editingTxId);
             if (idx > -1) {
-                const oldDateStr = toDateInputValue(new Date(db.transactions[idx].timestamp));
-                const finalTs = (dateVal && dateVal !== oldDateStr) ? txTimestamp : db.transactions[idx].timestamp;
+                const oldKey = toDateKey(new Date(db.transactions[idx].timestamp));
+                const newKey = toDateKey(txModalDate);
+                const finalTs = (newKey !== oldKey) ? txTimestamp : db.transactions[idx].timestamp;
                 db.transactions[idx] = { 
                     ...db.transactions[idx], 
                     timestamp: finalTs,
@@ -1807,21 +2087,26 @@
         editingTxId = null;
         document.getElementById('modal-title').style.display = 'none';
         document.getElementById('btn-save-tx').innerText = '記錄';
-        document.getElementById('tx-date').value = toDateInputValue(viewingDate);
+        
+        txModalDate = new Date(viewingDate);
+        formatTxDate();
         
         selectedCategory = '早午晚餐';
-        renderCategoryGrid();
+        document.getElementById('tx-single-acc').value = 'cash';
+        renderAccountGrid();
 
         const modal = document.getElementById('add-modal');
         modal.style.display = 'flex';
         setTimeout(() => modal.classList.add('show'), 10);
         document.getElementById('tx-amount').value = '';
         document.getElementById('tx-note').value = '';
+        closeCalc();
         setTxType('expense');
         trackModal(true);
     }
     
     function closeModal(event) {
+        closeCalc();
         const modal = document.getElementById('add-modal');
         modal.classList.remove('show');
         setTimeout(() => modal.style.display = 'none', 300);
