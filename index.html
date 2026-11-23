@@ -821,8 +821,17 @@
         bubbleTimer = setTimeout(() => b.classList.remove('show'), 3000);
     }
     function showLoadingAndExecute(action) {
-        const l = document.getElementById('loading'); l.classList.add('show');
-        setTimeout(() => { action(); setTimeout(() => l.classList.remove('show'), 300); }, 550);
+        const l = document.getElementById('loading');
+        l.classList.add('show');
+        setTimeout(() => {
+            try {
+                action();
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setTimeout(() => l.classList.remove('show'), 300);
+            }
+        }, 550);
     }
     function switchPage(page) {
         if (currentPage === page) return;
@@ -1244,20 +1253,45 @@
     }
 
     function exportData() {
-        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' }));
-        a.download = `記帳資料備份_${new Date().toISOString().split('T')[0]}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); showAlert('資料匯出成功！');
+        const url = URL.createObjectURL(new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' }));
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `記帳資料備份_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
     function importData() { document.getElementById('import-file').click(); }
     function handleImport(e) {
-        const f = e.target.files[0]; if (!f) return;
+        const f = e.target.files[0];
+        if (!f) return;
         const r = new FileReader();
         r.onload = (ev) => {
             try {
-                const d = JSON.parse(ev.target.result);
-                if (d && d.transactions) { db = d; if (db.monthlyBudget === undefined) db.monthlyBudget = 0; saveDB(); viewingDate = new Date(); formatViewingDate(); renderApp(); showAlert('資料匯入成功！', () => switchPage('home')); }
-                else showAlert('檔案格式不正確喔！');
-            } catch (err) { showAlert('讀取檔案失敗！'); }
+                const rawText = String(ev.target.result || '').replace(/^\uFEFF/, '').trim();
+                const d = JSON.parse(rawText);
+                if (d && Array.isArray(d.transactions)) {
+                    db = d;
+                    if (db.monthlyBudget === undefined) db.monthlyBudget = 0;
+                    saveDB();
+                    viewingDate = new Date();
+                    formatViewingDate();
+                    renderApp();
+                    showAlert('資料匯入成功！', () => switchPage('home'));
+                } else {
+                    showAlert('檔案格式不正確喔！');
+                }
+            } catch (err) {
+                console.error(err);
+                showAlert('讀取檔案失敗！');
+            } finally {
+                e.target.value = '';
+            }
+        };
+        r.onerror = () => {
             e.target.value = '';
+            showAlert('讀取檔案失敗！');
         };
         r.readAsText(f);
     }
