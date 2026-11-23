@@ -1253,7 +1253,36 @@
     }
 
     function exportData() {
-        const url = URL.createObjectURL(new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' }));
+        const cleanTx = (db.transactions || []).map(tx => {
+            const item = {
+                id: tx.id,
+                timestamp: tx.timestamp,
+                type: tx.type,
+                amount: tx.amount,
+                note: tx.note || ''
+            };
+            if (tx.originalMyr != null) item.originalMyr = tx.originalMyr;
+            if (tx.type === 'adjust') {
+                item.singleAcc = tx.singleAcc;
+                if (tx.prevAmount != null) item.prevAmount = tx.prevAmount;
+                if (tx.prevOriginalMyr != null) item.prevOriginalMyr = tx.prevOriginalMyr;
+            } else if (tx.type === 'transfer') {
+                item.category = '轉帳';
+                item.fromAcc = tx.fromAcc;
+                item.toAcc = tx.toAcc;
+            } else {
+                item.category = tx.category || '其他';
+                item.singleAcc = tx.singleAcc;
+            }
+            return item;
+        });
+
+        const exportPayload = {
+            transactions: cleanTx,
+            monthlyBudget: db.monthlyBudget || 0
+        };
+
+        const url = URL.createObjectURL(new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' }));
         const a = document.createElement('a');
         a.href = url;
         a.download = `記帳資料備份_${new Date().toISOString().split('T')[0]}.json`;
@@ -1262,31 +1291,52 @@
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
+
     function importData() { document.getElementById('import-file').click(); }
+
     function handleImport(e) {
         const f = e.target.files[0];
         if (!f) return;
         const r = new FileReader();
         r.onload = (ev) => {
+            let parsed;
             try {
                 const rawText = String(ev.target.result || '').replace(/^\uFEFF/, '').trim();
-                const d = JSON.parse(rawText);
-                if (d && Array.isArray(d.transactions)) {
-                    db = d;
-                    if (db.monthlyBudget === undefined) db.monthlyBudget = 0;
-                    saveDB();
-                    viewingDate = new Date();
-                    formatViewingDate();
-                    renderApp();
-                    showAlert('資料匯入成功！', () => switchPage('home'));
-                } else {
-                    showAlert('檔案格式不正確喔！');
-                }
+                parsed = JSON.parse(rawText);
             } catch (err) {
-                console.error(err);
-                showAlert('讀取檔案失敗！');
-            } finally {
                 e.target.value = '';
+                showAlert('檔案格式損毀，無法解析 JSON！');
+                return;
+            }
+
+            if (!parsed || !Array.isArray(parsed.transactions)) {
+                e.target.value = '';
+                showAlert('檔案格式不正確喔！');
+                return;
+            }
+
+            // 相容新舊資料並自動清理格式
+            db = {
+                transactions: parsed.transactions.map(tx => {
+                    if (tx.type === 'expense' || tx.type === 'income') {
+                        if (!tx.category) tx.category = '其他';
+                    }
+                    return tx;
+                }),
+                monthlyBudget: parsed.monthlyBudget || 0
+            };
+
+            saveDB();
+            viewingDate = new Date();
+            formatViewingDate();
+            e.target.value = '';
+
+            try {
+                renderApp();
+                showAlert('資料匯入成功！', () => switchPage('home'));
+            } catch (renderErr) {
+                console.error(renderErr);
+                showAlert('資料已存檔，但畫面更新出錯：' + renderErr.message);
             }
         };
         r.onerror = () => {
