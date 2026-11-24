@@ -556,6 +556,8 @@
                     </div>
                 </div>
             </div>
+            <div class="form-group" id="group-category"><label>類別</label><div class="category-grid" id="category-grid"></div></div>
+            <div class="form-group"><label>備註</label><input type="text" id="tx-note" placeholder="輸入項目（選填，未填則顯示類別）" onfocus="closeCalc()"></div>
             <div class="form-group" id="group-amount">
                 <label id="tx-amount-label">金額 (TWD)</label>
                 <input type="text" id="tx-amount" placeholder="輸入金額" readonly onclick="openCalc()">
@@ -581,8 +583,6 @@
                     <button type="button" class="calc-btn op" onclick="calcPress('-')">-</button>
                 </div>
             </div>
-            <div class="form-group" id="group-category"><label>類別</label><div class="category-grid" id="category-grid"></div></div>
-            <div class="form-group"><label>備註</label><input type="text" id="tx-note" placeholder="輸入項目（選填，未填則顯示類別）" onfocus="closeCalc()"></div>
             <div class="action-buttons"><button class="btn-cancel" onclick="closeModal()">取消</button><button class="btn-submit" id="btn-save-tx" onclick="saveTransaction()">記錄</button></div>
         </div>
     </div>
@@ -728,7 +728,12 @@
         });
     }
 
-    function openCalc() { document.getElementById('calc-pad').classList.add('show'); document.getElementById('tx-amount').classList.add('calc-focused'); }
+    function openCalc() {
+        const pad = document.getElementById('calc-pad');
+        pad.classList.add('show');
+        document.getElementById('tx-amount').classList.add('calc-focused');
+        setTimeout(() => pad.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+    }
     function evaluateCalcExpr(raw) {
         if (!raw) return '';
         let expr = String(raw).replace(/×/g, '*').replace(/÷/g, '/').replace(/[^0-9+\-*/.]/g, '').replace(/[+\-*/.]+$/, '');
